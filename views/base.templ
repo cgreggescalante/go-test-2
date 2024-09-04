@@ -1,0 +1,20 @@
+package views
+
+templ Base(cmp templ.Component) {
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+            <meta charset="UTF-8"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta name="description" content="Go Test 2"/>
+            <script src="https://unpkg.com/htmx.org@2.0.2" integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ" crossorigin="anonymous"></script>
+            <title>Go Test 2</title>
+        </head>
+        <body>
+            @Header()
+            <main id="main-content">
+                @cmp
+            </main>
+        </body>
+    </html>
+}

@@ -1,0 +1,10 @@
+package views
+
+templ Header() {
+    <header>
+        <a href="/home" hx-get="/home" hx-target="#main-content" hx-swap="innerHTML" hx-push-url="/home">Home</a>
+        <a href="/other" hx-get="/other" hx-target="#main-content" hx-swap="innerHTML" hx-push-url="/other">Other</a>
+        <a href="/login" hx-get="/login" hx-target="#main-content" hx-swap="innerHTML" hx-push-url="/login">Login</a>
+        <a href="/register" hx-get="/register" hx-target="#main-content" hx-swap="innerHTML" hx-push-url="/register">Register</a>
+    </header>
+}

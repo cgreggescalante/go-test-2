@@ -1,0 +1,54 @@
+package auth
+
+type RegisterFormData struct {
+    Message string
+    FirstName string
+    LastName string
+    Email string
+    Password string
+    ConfirmPassword string
+}
+
+func CreateRegisterFormData() *RegisterFormData {
+    return &RegisterFormData{
+        Message: "",
+        FirstName: "",
+        LastName: "",
+        Email: "",
+        Password: "",
+        ConfirmPassword: "",
+    }
+}
+
+templ Register(data RegisterFormData) {
+    <div>
+        <h1>Register</h1>
+        <h4>{ data.Message }</h4>
+        <form hx-post="/register" hx-target="#main-content" hx-swap="innerHTML">
+            <label>
+                First Name
+                <input name="firstName" value={data.FirstName} required autofocus />
+            </label>
+            <label>
+                Last Name
+                <input name="lastName" value={data.LastName} required />
+            </label>
+            <label>
+                Email
+                <input type="email" name="email" value={data.Email} required />
+            </label>
+            <label>
+                Password
+                <input type="password" name="password" value={data.Password} required />
+            </label>
+            <label>
+                Confirm Password
+                <input type="password" name="confirmPassword" value={data.ConfirmPassword} required />
+            </label>
+
+            <button type="submit">
+                Register
+            </button>
+        </form>
+    </div>
+}
