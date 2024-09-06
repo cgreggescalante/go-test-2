@@ -23,7 +23,7 @@ func NewStore(name string) (Store, error) {
 
 	Db, err = sql.Open("sqlite3", name)
 	if err != nil {
-		return Store{}, fmt.Errorf("Failed to connect to the database: %s", err)
+		return Store{}, fmt.Errorf("failed to connect to the database: %s", err)
 	}
 
 	_, err = Db.Exec(`

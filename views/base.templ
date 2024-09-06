@@ -1,6 +1,8 @@
 package views
 
-templ Base(cmp templ.Component) {
+import "go-test-2/services"
+
+templ Base(cmp templ.Component, user services.User) {
     <!DOCTYPE html>
     <html lang="en">
         <head>
@@ -11,8 +13,8 @@ templ Base(cmp templ.Component) {
             <title>Go Test 2</title>
         </head>
         <body>
-            @Header()
-            <main id="main-content">
+            @Header(user)
+            <main id="main-content" style="border: 1px solid black">
                 @cmp
             </main>
         </body>

@@ -13,34 +13,33 @@ func renderView(c echo.Context, cmp templ.Component) error {
 	return cmp.Render(c.Request().Context(), c.Response().Writer)
 }
 
-func baseHandler(c echo.Context) error {
-	return renderView(c, views.Base(views.Home()))
+func (ah *AuthHandler) fullPageRender(c echo.Context, cmp templ.Component) error {
+	return renderView(c, views.Base(cmp, ah.UserService.User))
 }
 
-func homeHandler(c echo.Context) error {
-	if c.Request().Header.Get("HX-Request") != "" {
-		return renderView(c, views.Home())
-	}
-	return renderView(c, views.Base(views.Home()))
+func (ah *AuthHandler) baseHandler(c echo.Context) error {
+	return ah.fullPageRender(c, views.Home())
 }
 
-func otherHandler(c echo.Context) error {
+func (ah *AuthHandler) rerenderBody(c echo.Context, cmp templ.Component) error {
 	if c.Request().Header.Get("HX-Request") != "" {
-		return renderView(c, views.Other())
+		return renderView(c, cmp)
 	}
-	return renderView(c, views.Base(views.Other()))
+	return renderView(c, views.Base(cmp, ah.UserService.User))
 }
 
-func loginHandler(c echo.Context) error {
-	if c.Request().Header.Get("HX-Request") != "" {
-		return renderView(c, auth.Login(""))
-	}
-	return renderView(c, views.Base(auth.Login("")))
+func (ah *AuthHandler) homeHandler(c echo.Context) error {
+	return ah.rerenderBody(c, views.Home())
 }
 
-func registerHandler(c echo.Context) error {
-	if c.Request().Header.Get("HX-Request") != "" {
-		return renderView(c, auth.Register(*auth.CreateRegisterFormData()))
-	}
-	return renderView(c, views.Base(auth.Register(*auth.CreateRegisterFormData())))
+func (ah *AuthHandler) addActivityHandler(c echo.Context) error {
+	return ah.rerenderBody(c, views.AddActivity())
+}
+
+func (ah *AuthHandler) loginHandler(c echo.Context) error {
+	return ah.rerenderBody(c, auth.Login())
+}
+
+func (ah *AuthHandler) registerHandler(c echo.Context) error {
+	return ah.rerenderBody(c, auth.Register())
 }
