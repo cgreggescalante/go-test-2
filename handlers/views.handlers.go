@@ -18,7 +18,7 @@ func (ah *AuthHandler) fullPageRender(c echo.Context, cmp templ.Component) error
 }
 
 func (ah *AuthHandler) baseHandler(c echo.Context) error {
-	return ah.fullPageRender(c, views.Home())
+	return ah.fullPageRender(c, views.Home(ah.Authorized))
 }
 
 func (ah *AuthHandler) rerenderBody(c echo.Context, cmp templ.Component) error {
@@ -29,7 +29,7 @@ func (ah *AuthHandler) rerenderBody(c echo.Context, cmp templ.Component) error {
 }
 
 func (ah *AuthHandler) homeHandler(c echo.Context) error {
-	return ah.rerenderBody(c, views.Home())
+	return ah.rerenderBody(c, views.Home(ah.Authorized))
 }
 
 func (ah *AuthHandler) addActivityHandler(c echo.Context) error {

@@ -1,10 +1,13 @@
 package services
 
-import "go-test-2/db"
+import (
+	"go-test-2/db"
+)
 
 var ActivityTypes = [...]string{"Run", "Bike", "Ski", "Swim"}
 
 type Activity struct {
+	Id          int
 	UserId      int
 	Date        int64
 	Description string
@@ -16,6 +19,11 @@ type Activity struct {
 	SkiPoints   float64
 	Swim        float64
 	SwimPoints  float64
+}
+
+type ActivityWithUser struct {
+	Activity Activity
+	User     User
 }
 
 type ActivityServices struct {
@@ -45,4 +53,78 @@ func (as *ActivityServices) CreateActivity(activity Activity) error {
 		return err
 	}
 	return nil
+}
+
+func (as *ActivityServices) GetRecentActivities(page int, pageSize int) ([]ActivityWithUser, error) {
+	query := `SELECT u.firstName, u.lastName, activities.* FROM activities JOIN main.users u on u.id = activities.userId ORDER BY date DESC LIMIT ? OFFSET ?`
+
+	statement, err := as.ActivityStore.Db.Prepare(query)
+	if err != nil {
+		return []ActivityWithUser{}, err
+	}
+
+	rows, err := statement.Query(pageSize, (page-1)*pageSize)
+	if err != nil {
+		return []ActivityWithUser{}, err
+	}
+
+	var result []ActivityWithUser
+
+	for rows.Next() {
+		var activity Activity
+		var user User
+		err = rows.Scan(
+			&user.FirstName, &user.LastName,
+			&activity.Id,
+			&activity.UserId,
+			&activity.Date,
+			&activity.Description,
+			&activity.Run, &activity.RunPoints,
+			&activity.Bike, &activity.BikePoints,
+			&activity.Ski, &activity.SkiPoints,
+			&activity.Swim, &activity.SwimPoints,
+		)
+		if err != nil {
+			return []ActivityWithUser{}, err
+		}
+
+		result = append(result, ActivityWithUser{Activity: activity, User: user})
+	}
+
+	return result, nil
+}
+
+func (as *ActivityServices) GetRecentActivitiesByUser(user User, page int, pageSize int) ([]ActivityWithUser, error) {
+	query := `SELECT * FROM activities WHERE userId = ? ORDER BY date DESC LIMIT ? OFFSET ?`
+
+	statement, err := as.ActivityStore.Db.Prepare(query)
+	if err != nil {
+		return []ActivityWithUser{}, err
+	}
+
+	rows, err := statement.Query(user.ID, pageSize, (page-1)*pageSize)
+	if err != nil {
+		return []ActivityWithUser{}, err
+	}
+
+	var result []ActivityWithUser
+	for rows.Next() {
+		var activity Activity
+		err = rows.Scan(
+			&activity.Id,
+			&activity.UserId,
+			&activity.Date,
+			&activity.Description,
+			&activity.Run, &activity.RunPoints,
+			&activity.Bike, &activity.BikePoints,
+			&activity.Ski, &activity.SkiPoints,
+			&activity.Swim, &activity.SwimPoints,
+		)
+		if err != nil {
+			return []ActivityWithUser{}, err
+		}
+		result = append(result, ActivityWithUser{Activity: activity, User: user})
+	}
+
+	return result, nil
 }

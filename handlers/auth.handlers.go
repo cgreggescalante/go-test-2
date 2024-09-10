@@ -28,7 +28,7 @@ func (ah *AuthHandler) successfulPost(c echo.Context) error {
 	c.Response().Header().Set("HX-Retarget", "body")
 	c.Response().Header().Set("HX-Reswap", "innerHTML")
 
-	return renderView(c, views.Base(views.Home(), ah.UserService.User))
+	return renderView(c, views.Base(views.Home(ah.Authorized), ah.UserService.User))
 }
 
 func (ah *AuthHandler) loginPostHandler(c echo.Context) error {
@@ -53,11 +53,6 @@ func (ah *AuthHandler) loginPostHandler(c echo.Context) error {
 func (ah *AuthHandler) registerPostHandler(c echo.Context) error {
 	password := c.FormValue("password")
 	confirmPassword := c.FormValue("confirmPassword")
-
-	//if len(formData.Password) < 10 {
-	//	formData.Message = "Password must be at least 10 characters"
-	//	return renderView(c, auth.Register(formData))
-	//}
 
 	if password != confirmPassword {
 		return c.HTML(http.StatusOK, "Passwords do not match")

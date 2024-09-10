@@ -1,7 +1,11 @@
 package views
 
-templ Home() {
+import "go-test-2/views/partials"
+
+templ Home(authorized bool) {
     <div>
         Home
+
+        @partials.RecentActivities(authorized)
     </div>
 }

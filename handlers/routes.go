@@ -18,4 +18,6 @@ func SetRoutes(e *echo.Echo, ah *AuthHandler) {
 	e.POST("/register", ah.registerPostHandler)
 
 	e.POST("/signout", ah.signoutPostHandler)
+
+	e.GET("/activities", ah.getActivityHandler)
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"go-test-2/services"
+	"go-test-2/views/partials"
 	"log"
 	"net/http"
 	"strconv"
@@ -53,4 +54,34 @@ func (ah *AuthHandler) addActivityPostHandler(c echo.Context) error {
 	}
 
 	return c.HTML(http.StatusOK, "Processed")
+}
+
+func (ah *AuthHandler) getActivityHandler(c echo.Context) error {
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil {
+		return c.HTML(http.StatusOK, "Bad value for page")
+	}
+	pageSize, err := strconv.Atoi(c.QueryParam("pageSize"))
+	if err != nil {
+		return c.HTML(http.StatusOK, "Bad value for pageSize")
+	}
+	user := c.QueryParam("user")
+	if !(user == "all" || user == "current") {
+		fmt.Printf("Bad value for user: %s\n", user)
+		user = "all"
+	}
+
+	var activities []services.ActivityWithUser
+
+	if user == "all" {
+		activities, err = ah.ActivityService.GetRecentActivities(page, pageSize)
+	} else {
+		activities, err = ah.ActivityService.GetRecentActivitiesByUser(ah.UserService.User, page, pageSize)
+	}
+	if err != nil {
+		fmt.Println(err)
+		return c.HTML(http.StatusOK, "Could not get activities")
+	}
+
+	return renderView(c, partials.ActivityBlock(activities, page+1, pageSize, "all", len(activities) == pageSize))
 }
