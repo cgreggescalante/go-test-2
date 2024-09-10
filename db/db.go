@@ -39,6 +39,24 @@ func NewStore(name string) (Store, error) {
 		return Store{}, err
 	}
 
+	_, err = Db.Exec(`
+		CREATE TABLE IF NOT EXISTS activities (
+		    id INTEGER PRIMARY KEY AUTOINCREMENT,
+		    userId INTEGER,
+		    date INT,
+		    description VARCHAR(255),
+		    run REAL,
+		    runPoints REAL,
+			bike REAL,
+			bikePoints REAL,
+			ski REAL,
+			skiPoints REAL,
+			swim REAL,
+			swimPoints REAL,
+		    FOREIGN KEY (userId) REFERENCES users(id)
+		)
+	`)
+
 	log.Println("Connected to the database")
 
 	return Store{Db}, nil

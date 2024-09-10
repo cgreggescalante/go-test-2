@@ -1,9 +1,97 @@
 package views
 
+import "go-test-2/services"
 
+var handle = templ.NewOnceHandle()
 
 templ AddActivity() {
     <div>
-        Other Content
+        <script>
+            function handleSelect() {
+                const selector = document.getElementById("activitySelector");
+                const list = document.getElementById("selectedActivities");
+
+                if (selector.selectedIndex === 0) return;
+
+                const value = selector.value;
+                selector.remove(selector.selectedIndex);
+
+                const newItem = document.createElement("div");
+
+                const btn = document.createElement("button");
+                btn.innerText = "X";
+                btn.addEventListener("click", () => {
+                    newItem.remove();
+
+                    const option = document.createElement("option");
+                    option.value = value;
+                    option.textContent = value;
+                    selector.appendChild(option);
+                });
+
+                const span = document.createElement("span");
+                span.innerText = value;
+
+                const input = document.createElement("input");
+                input.type = "number";
+                input.id = value;
+                input.name = value;
+                input.setAttribute("form", "addActivityForm");
+
+                newItem.appendChild(btn);
+                newItem.appendChild(span);
+                newItem.appendChild(input);
+
+                newItem.id = `${value}-row`
+                newItem.style = "display: flex; flex-direction: row"
+                list.appendChild(newItem);
+            }
+
+            function handleSubmit() {
+                const form = document.getElementById("addActivityForm");
+
+                const selectedActivities = document.getElementById("selectedActivities").querySelectorAll("input");
+
+                selectedActivities.forEach(input => {
+                    const hidden = document.createElement("input");
+                    hidden.type = "hidden";
+                    hidden.name = input.name;
+                    hidden.id = input.id;
+                    hidden.value = input.value;
+                    form.appendChild(hidden);
+                });
+
+                return true;
+            }
+        </script>
+
+        <h1>Add Activity</h1>
+
+        <select id="activitySelector" onchange="handleSelect()">
+            <option value="">-- Select an Activity --</option>
+            for _, item := range services.ActivityTypes {
+                <option value={ item }>{ item }</option>
+            }
+        </select>
+
+        <div>
+            <label>
+                Description
+                <textarea id="description" name="description" form="addActivityForm"></textarea>
+             </label>
+        </div>
+
+        <div id="selectedActivities">
+        </div>
+
+        <form id="addActivityForm" onsubmit="return handleSubmit()" hx-post="/addActivity" hx-target="#addActivityMessage" hx-swap="innerHTML">
+            <button type="submit">Submit</button>
+        </form>
+
+        <div id="addActivityMessage"></div>
     </div>
+}
+
+templ PartialAddActivity(message string) {
+    { message }
 }

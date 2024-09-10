@@ -7,7 +7,9 @@ import (
 func SetRoutes(e *echo.Echo, ah *AuthHandler) {
 	e.GET("/", ah.baseHandler)
 	e.GET("/home", ah.homeHandler)
+
 	e.GET("/addActivity", ah.addActivityHandler)
+	e.POST("/addActivity", ah.addActivityPostHandler)
 
 	e.GET("/login", ah.loginHandler)
 	e.POST("/login", ah.loginPostHandler)

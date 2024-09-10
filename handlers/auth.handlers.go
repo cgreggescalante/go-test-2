@@ -9,14 +9,18 @@ import (
 	"log"
 )
 
-func NewAuthHandler(us *services.UserServices) *AuthHandler {
+func NewAuthHandler(us *services.UserServices, as *services.ActivityServices) *AuthHandler {
 	return &AuthHandler{
-		UserService: us,
+		Authorized:      false,
+		UserService:     us,
+		ActivityService: as,
 	}
 }
 
 type AuthHandler struct {
-	UserService *services.UserServices
+	Authorized      bool
+	UserService     *services.UserServices
+	ActivityService *services.ActivityServices
 }
 
 func (ah *AuthHandler) successfulPost(c echo.Context) error {
@@ -40,6 +44,7 @@ func (ah *AuthHandler) loginPostHandler(c echo.Context) error {
 
 	log.Println("Logged in", user.FirstName, user.LastName)
 
+	ah.Authorized = true
 	ah.UserService.User = user
 
 	return ah.successfulPost(c)
@@ -83,6 +88,7 @@ func (ah *AuthHandler) registerPostHandler(c echo.Context) error {
 		return renderView(c, auth.PartialRegister("Could not create account"))
 	}
 
+	ah.Authorized = true
 	ah.UserService.User = services.User{
 		FirstName: firstName,
 		LastName:  lastName,
@@ -94,6 +100,7 @@ func (ah *AuthHandler) registerPostHandler(c echo.Context) error {
 
 func (ah *AuthHandler) signoutPostHandler(c echo.Context) error {
 	ah.UserService.User = services.User{}
+	ah.Authorized = false
 
 	return ah.successfulPost(c)
 }

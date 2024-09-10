@@ -19,7 +19,8 @@ func main() {
 	}
 
 	us := services.NewUserService(services.User{}, store)
-	ah := handlers.NewAuthHandler(us)
+	as := services.NewActivityService(store)
+	ah := handlers.NewAuthHandler(us, as)
 
 	handlers.SetRoutes(e, ah)
 
