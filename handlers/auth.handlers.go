@@ -4,9 +4,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"go-test-2/services"
 	"go-test-2/views"
-	"go-test-2/views/auth"
 	"golang.org/x/crypto/bcrypt"
 	"log"
+	"net/http"
 )
 
 func NewAuthHandler(us *services.UserServices, as *services.ActivityServices) *AuthHandler {
@@ -34,12 +34,12 @@ func (ah *AuthHandler) successfulPost(c echo.Context) error {
 func (ah *AuthHandler) loginPostHandler(c echo.Context) error {
 	user, err := ah.UserService.CheckEmail(c.FormValue("email"))
 	if err != nil {
-		return renderView(c, auth.PartialLogin("Bad Email"))
+		return c.HTML(http.StatusOK, "Bad Email")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(c.FormValue("password")))
 	if err != nil {
-		return renderView(c, auth.PartialLogin("Wrong Password"))
+		return c.HTML(http.StatusOK, "Wrong Password")
 	}
 
 	log.Println("Logged in", user.FirstName, user.LastName)
@@ -60,22 +60,22 @@ func (ah *AuthHandler) registerPostHandler(c echo.Context) error {
 	//}
 
 	if password != confirmPassword {
-		return renderView(c, auth.PartialRegister("Passwords do not match"))
+		return c.HTML(http.StatusOK, "Passwords do not match")
 	}
 
 	firstName := c.FormValue("firstName")
 	if firstName == "" {
-		return renderView(c, auth.PartialRegister("First Name is required"))
+		return c.HTML(http.StatusOK, "First Name is required")
 	}
 
 	lastName := c.FormValue("lastName")
 	if lastName == "" {
-		return renderView(c, auth.PartialRegister("Last Name is required"))
+		return c.HTML(http.StatusOK, "Last Name is required")
 	}
 
 	email := c.FormValue("email")
 	if email == "" {
-		return renderView(c, auth.PartialRegister("Email is required"))
+		return c.HTML(http.StatusOK, "Email is required")
 	}
 
 	err := ah.UserService.CreateUser(services.User{
@@ -85,7 +85,7 @@ func (ah *AuthHandler) registerPostHandler(c echo.Context) error {
 		Password:  password,
 	})
 	if err != nil {
-		return renderView(c, auth.PartialRegister("Could not create account"))
+		return c.HTML(http.StatusOK, "Could not create account")
 	}
 
 	ah.Authorized = true

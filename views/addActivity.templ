@@ -36,7 +36,6 @@ templ AddActivity() {
                 input.type = "number";
                 input.id = value;
                 input.name = value;
-                input.setAttribute("form", "addActivityForm");
 
                 newItem.appendChild(btn);
                 newItem.appendChild(span);
@@ -45,23 +44,6 @@ templ AddActivity() {
                 newItem.id = `${value}-row`
                 newItem.style = "display: flex; flex-direction: row"
                 list.appendChild(newItem);
-            }
-
-            function handleSubmit() {
-                const form = document.getElementById("addActivityForm");
-
-                const selectedActivities = document.getElementById("selectedActivities").querySelectorAll("input");
-
-                selectedActivities.forEach(input => {
-                    const hidden = document.createElement("input");
-                    hidden.type = "hidden";
-                    hidden.name = input.name;
-                    hidden.id = input.id;
-                    hidden.value = input.value;
-                    form.appendChild(hidden);
-                });
-
-                return true;
             }
         </script>
 
@@ -74,24 +56,20 @@ templ AddActivity() {
             }
         </select>
 
-        <div>
-            <label>
-                Description
-                <textarea id="description" name="description" form="addActivityForm"></textarea>
-             </label>
-        </div>
+        <form id="addActivityForm"  hx-post="/addActivity" hx-target="#addActivityMessage" hx-swap="innerHTML">
+            <div>
+                <label>
+                    Description
+                    <textarea id="description" name="description"></textarea>
+                 </label>
+            </div>
 
-        <div id="selectedActivities">
-        </div>
+            <div id="selectedActivities">
+            </div>
 
-        <form id="addActivityForm" onsubmit="return handleSubmit()" hx-post="/addActivity" hx-target="#addActivityMessage" hx-swap="innerHTML">
             <button type="submit">Submit</button>
         </form>
 
         <div id="addActivityMessage"></div>
     </div>
-}
-
-templ PartialAddActivity(message string) {
-    { message }
 }

@@ -4,24 +4,22 @@ templ Login() {
     <div>
         <h1>Login</h1>
 
-        <label>
-            Email
-            <input form="loginForm" type="email" name="email" required autofocus />
-        </label>
-        <label>
-            Password
-            <input form="loginForm" type="password" name="password" required />
-        </label>
+        <form id="loginForm" hx-post="/login" hx-target="#loginMessage" hx-swap="innerHTML">
+            <label>
+                Email
+                <input type="email" name="email" required autofocus />
+            </label>
+            <label>
+                Password
+                <input type="password" name="password" required />
+            </label>
 
-        @PartialLogin("")
+            <button type="submit">
+                Login
+            </button>
+        </form>
+
+        <div id="loginMessage">
+        </div>
     </div>
-}
-
-templ PartialLogin(message string) {
-    <form id="loginForm" hx-post="/login" hx-target="#loginForm" hx-swap="outerHTML">
-        <button type="submit">
-            Login
-        </button>
-        { message }
-    </form>
 }
