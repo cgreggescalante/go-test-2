@@ -1,0 +1,28 @@
+package views
+
+import (
+    "fmt"
+    "go-test-2/services"
+)
+
+templ EventList(events []services.Event) {
+    <div>Event List</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Start</th>
+                <th>End</th>
+            </tr>
+        </thead>
+        <tbody>
+            for _, event := range events {
+                <tr>
+                    <td>{event.Name}</td>
+                    <td>{fmt.Sprintf("%d", event.Start)}</td>
+                    <td>{fmt.Sprintf("%d", event.End)}</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

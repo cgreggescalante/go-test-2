@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-	ID        int
+	ID        int64
 	Email     string
 	Password  string
 	FirstName string
@@ -31,7 +31,7 @@ func (us *UserServices) CreateUser(u User) error {
 		return err
 	}
 
-	statement := `INSERT INTO users (email, password, firstName, lastName) VALUES (?, ?, ?, ?)`
+	statement := `INSERT INTO users (email, password, first_name, last_name) VALUES (?, ?, ?, ?)`
 
 	_, err = us.UserStore.Db.Exec(statement, u.Email, string(hashedPassword), u.FirstName, u.LastName)
 
@@ -39,7 +39,7 @@ func (us *UserServices) CreateUser(u User) error {
 }
 
 func (us *UserServices) CheckEmail(email string) (User, error) {
-	query := `SELECT id, email, password, firstName, lastName FROM users WHERE email = ?`
+	query := `SELECT id, email, password, first_name, last_name FROM users WHERE email = ?`
 
 	statement, err := us.UserStore.Db.Prepare(query)
 	if err != nil {

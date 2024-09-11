@@ -9,11 +9,12 @@ import (
 	"net/http"
 )
 
-func NewAuthHandler(us *services.UserServices, as *services.ActivityServices) *AuthHandler {
+func NewAuthHandler(us *services.UserServices, as *services.ActivityServices, es *services.EventServices) *AuthHandler {
 	return &AuthHandler{
 		Authorized:      false,
 		UserService:     us,
 		ActivityService: as,
+		EventService:    es,
 	}
 }
 
@@ -21,6 +22,7 @@ type AuthHandler struct {
 	Authorized      bool
 	UserService     *services.UserServices
 	ActivityService *services.ActivityServices
+	EventService    *services.EventServices
 }
 
 func (ah *AuthHandler) successfulPost(c echo.Context) error {

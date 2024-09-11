@@ -4,6 +4,7 @@ go 1.23.0
 
 require (
 	github.com/a-h/templ v0.2.771
+	github.com/jmoiron/sqlx v1.4.0
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/mattn/go-sqlite3 v1.14.22
 	golang.org/x/crypto v0.26.0

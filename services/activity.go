@@ -4,21 +4,35 @@ import (
 	"go-test-2/db"
 )
 
-var ActivityTypes = [...]string{"Run", "Bike", "Ski", "Swim"}
+var ActivityTypes = [...]string{"Run", "Classic Roller Skiing", "Skate Roller Skiing", "Road Biking", "Mountain Biking", "Walking", "Hiking With Packs", "Swimming", "Paddling", "Strength Training", "Aerobic Sports"}
 
 type Activity struct {
-	Id          int
-	UserId      int
-	Date        int64
-	Description string
-	Run         float64
-	RunPoints   float64
-	Bike        float64
-	BikePoints  float64
-	Ski         float64
-	SkiPoints   float64
-	Swim        float64
-	SwimPoints  float64
+	Id                        int64
+	UserId                    int64 `db:"user_id"`
+	Date                      int64
+	Description               string
+	Run                       float64
+	RunPoints                 float64 `db:"run_points"`
+	ClassicRollerSkiing       float64 `db:"classic_roller_skiing"`
+	ClassicRollerSkiingPoints float64 `db:"classic_roller_skiing_points"`
+	SkateRollerSkiing         float64 `db:"skate_roller_skiing"`
+	SkateRollerSkiingPoints   float64 `db:"skate_roller_skiing_points"`
+	RoadBiking                float64 `db:"road_biking"`
+	RoadBikingPoints          float64 `db:"road_biking_points"`
+	MountainBiking            float64 `db:"mountain_biking"`
+	MountainBikingPoints      float64 `db:"mountain_biking_points"`
+	Walking                   float64
+	WalkingPoints             float64 `db:"walking_points"`
+	HikingWithPacks           float64 `db:"hiking_with_packs"`
+	HikingWithPacksPoints     float64 `db:"hiking_with_packs_points"`
+	Swimming                  float64
+	SwimmingPoints            float64 `db:"swimming_points"`
+	Paddling                  float64
+	PaddlingPoints            float64 `db:"paddling_points"`
+	StrengthTraining          float64 `db:"strength_training"`
+	StrengthTrainingPoints    float64 `db:"strength_training_points"`
+	AerobicSports             float64 `db:"aerobic_sports"`
+	AerobicSportsPoints       float64 `db:"aerobic_sports_points"`
 }
 
 type LeaderboardEntry struct {
@@ -28,8 +42,9 @@ type LeaderboardEntry struct {
 }
 
 type ActivityWithUser struct {
-	Activity Activity
-	User     User
+	Activity
+	FirstName string `db:"first_name"`
+	LastName  string `db:"last_name"`
 }
 
 type ActivityServices struct {
@@ -43,18 +58,36 @@ func NewActivityService(activityStore db.Store) *ActivityServices {
 }
 
 func (as *ActivityServices) CreateActivity(activity Activity) error {
-	statement := `INSERT INTO activities (userId, date, description, run, runPoints, bike, bikePoints, ski, skiPoints, swim, swimPoints) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+	statement := `INSERT INTO activities (
+		               user_id, date, description,
+		               run, run_points,
+		               classic_roller_skiing, classic_roller_skiing_points,
+		               skate_roller_skiing, skate_roller_skiing_points,
+		               road_biking, road_biking_points,
+		               mountain_biking, mountain_biking_points,
+		               walking, walking_points,
+		               hiking_with_packs, hiking_with_packs_points,
+		               swimming, swimming_points,
+		               paddling, paddling_points,
+		               strength_training, strength_training_points,
+		               aerobic_sports, aerobic_sports_points
+					) VALUES (
+					  	:user_id, :date, :description,
+						:run, :run_points,
+						:classic_roller_skiing, :classic_roller_skiing_points,
+						:skate_roller_skiing, :skate_roller_skiing_points,
+						:road_biking, :road_biking_points,
+						:mountain_biking, :mountain_biking_points,
+						:walking, :walking_points,
+						:hiking_with_packs, :hiking_with_packs_points,
+						:swimming, :swimming_points,
+						:paddling, :paddling_points,
+						:strength_training, :strength_training_points,
+						:aerobic_sports, :aerobic_sports_points
+					);`
 
-	_, err := as.ActivityStore.Db.Exec(
-		statement,
-		activity.UserId,
-		activity.Date,
-		activity.Description,
-		activity.Run, activity.RunPoints,
-		activity.Bike, activity.BikePoints,
-		activity.Ski, activity.SkiPoints,
-		activity.Swim, activity.SwimPoints,
-	)
+	_, err := as.ActivityStore.Db.NamedExec(statement, activity)
+
 	if err != nil {
 		return err
 	}
@@ -62,81 +95,37 @@ func (as *ActivityServices) CreateActivity(activity Activity) error {
 }
 
 func (as *ActivityServices) GetRecentActivities(page int, pageSize int) ([]ActivityWithUser, error) {
-	query := `SELECT u.firstName, u.lastName, activities.* FROM activities JOIN main.users u on u.id = activities.userId ORDER BY date DESC LIMIT ? OFFSET ?`
-
-	statement, err := as.ActivityStore.Db.Prepare(query)
-	if err != nil {
-		return []ActivityWithUser{}, err
-	}
-
-	rows, err := statement.Query(pageSize, (page-1)*pageSize)
-	if err != nil {
-		return []ActivityWithUser{}, err
-	}
+	query := `SELECT u.first_name, u.last_name, activities.* FROM activities JOIN main.users u on u.id = activities.user_id ORDER BY date DESC LIMIT ? OFFSET ?`
 
 	var result []ActivityWithUser
 
-	for rows.Next() {
-		var activity Activity
-		var user User
-		err = rows.Scan(
-			&user.FirstName, &user.LastName,
-			&activity.Id,
-			&activity.UserId,
-			&activity.Date,
-			&activity.Description,
-			&activity.Run, &activity.RunPoints,
-			&activity.Bike, &activity.BikePoints,
-			&activity.Ski, &activity.SkiPoints,
-			&activity.Swim, &activity.SwimPoints,
-		)
-		if err != nil {
-			return []ActivityWithUser{}, err
-		}
-
-		result = append(result, ActivityWithUser{Activity: activity, User: user})
+	if err := as.ActivityStore.Db.Select(&result, query, pageSize, (page-1)*pageSize); err != nil {
+		return []ActivityWithUser{}, err
 	}
 
 	return result, nil
 }
 
 func (as *ActivityServices) GetRecentActivitiesByUser(user User, page int, pageSize int) ([]ActivityWithUser, error) {
-	query := `SELECT * FROM activities WHERE userId = ? ORDER BY date DESC LIMIT ? OFFSET ?`
+	query := `SELECT * FROM activities WHERE user_id = ? ORDER BY date DESC LIMIT ? OFFSET ?`
 
-	statement, err := as.ActivityStore.Db.Prepare(query)
-	if err != nil {
-		return []ActivityWithUser{}, err
-	}
-
-	rows, err := statement.Query(user.ID, pageSize, (page-1)*pageSize)
-	if err != nil {
+	var activities []ActivityWithUser
+	if err := as.ActivityStore.Db.Select(&activities, query, user.ID, pageSize, (page-1)*pageSize); err != nil {
 		return []ActivityWithUser{}, err
 	}
 
 	var result []ActivityWithUser
-	for rows.Next() {
-		var activity Activity
-		err = rows.Scan(
-			&activity.Id,
-			&activity.UserId,
-			&activity.Date,
-			&activity.Description,
-			&activity.Run, &activity.RunPoints,
-			&activity.Bike, &activity.BikePoints,
-			&activity.Ski, &activity.SkiPoints,
-			&activity.Swim, &activity.SwimPoints,
-		)
-		if err != nil {
-			return []ActivityWithUser{}, err
-		}
-		result = append(result, ActivityWithUser{Activity: activity, User: user})
+	for _, activity := range activities {
+		activity.FirstName = user.FirstName
+		activity.LastName = user.LastName
+		result = append(result, activity)
 	}
 
 	return result, nil
 }
 
 func (as *ActivityServices) GetLeaderboard() ([]LeaderboardEntry, error) {
-	query := `SELECT u.firstName || ' ' || u.lastName, SUM(runPoints + bikePoints + skiPoints + swimPoints) as points FROM activities JOIN main.users u on u.id = activities.userId GROUP BY userId ORDER BY points DESC`
+	query := `SELECT u.first_name || ' ' || u.last_name, SUM(run_points) as points FROM activities JOIN main.users u on u.id = activities.user_id GROUP BY user_id ORDER BY points DESC`
 
 	statement, err := as.ActivityStore.Db.Prepare(query)
 	if err != nil {

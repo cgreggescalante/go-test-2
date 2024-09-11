@@ -2,6 +2,7 @@ package partials
 
 import (
     "fmt"
+    "time"
     "go-test-2/services"
 )
 
@@ -52,13 +53,13 @@ templ RecentActivities(authorized bool) {
 templ ActivityBlock(activities []services.ActivityWithUser, page int, pageSize int, filter string, more bool) {
     for _, item := range activities {
         <tr>
-            <td>{ item.User.FirstName } { item.User.LastName }</td>
-            <td>{fmt.Sprintf("%d", item.Activity.Date)}</td>
-            <td>{item.Activity.Description}</td>
-            <td>{fmt.Sprintf("%.1f", item.Activity.Run)}</td>
-            <td>{fmt.Sprintf("%.1f", item.Activity.Bike)}</td>
-            <td>{fmt.Sprintf("%.1f", item.Activity.Ski)}</td>
-            <td>{fmt.Sprintf("%.1f", item.Activity.Swim)}</td>
+            <td>{ item.FirstName } { item.LastName }</td>
+            <td>{time.Unix(item.Date, 0).Format(time.RFC1123) }</td>
+            <td>{item.Description}</td>
+            <td>{fmt.Sprintf("%.1f", item.Run)}</td>
+            <td>{fmt.Sprintf("%.1f", item.RoadBiking)}</td>
+            <td>{fmt.Sprintf("%.1f", item.ClassicRollerSkiing)}</td>
+            <td>{fmt.Sprintf("%.1f", item.Swimming)}</td>
         </tr>
     }
     if more {

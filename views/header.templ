@@ -6,6 +6,7 @@ templ Header(user services.User) {
     <header style="border: 1px solid black; display: flex; justify-content: space-between">
         <span>
             <a href="/home" hx-get="/home" hx-target="#main-content" hx-swap="innerHTML" hx-push-url="/home">Home</a>
+            <a href="/events" hx-get="/events" hx-target="#main-content" hx-swap="innerHTML" hx-push-url="/events">Events</a>
             <a href="/leaderboard" hx-get="/leaderboard" hx-target="#main-content" hx-swap="innerHTML" hx-push-url="/leaderboard">Leaderboard</a>
             if (user.Email != "") {
                 <a href="/addActivity" hx-get="/addActivity" hx-target="#main-content" hx-swap="innerHTML" hx-push-url="/addActivity">Add Activity</a>

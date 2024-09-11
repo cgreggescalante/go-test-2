@@ -56,3 +56,12 @@ func (ah *AuthHandler) getLeaderboardHandler(c echo.Context) error {
 
 	return renderView(c, views.LeaderboardBody(data))
 }
+
+func (ah *AuthHandler) eventsHandler(c echo.Context) error {
+	data, err := ah.EventService.GetEvents()
+	if err != nil {
+		return err
+	}
+
+	return ah.rerenderBody(c, views.EventList(data))
+}

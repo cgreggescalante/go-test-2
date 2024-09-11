@@ -23,4 +23,6 @@ func SetRoutes(e *echo.Echo, ah *AuthHandler) {
 
 	e.GET("/leaderboard", ah.leaderboardHandler)
 	e.GET("/getLeaderboard", ah.getLeaderboardHandler)
+
+	e.GET("/events", ah.eventsHandler)
 }
