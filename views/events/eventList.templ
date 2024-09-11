@@ -1,4 +1,4 @@
-package views
+package events
 
 import (
     "fmt"
@@ -18,7 +18,7 @@ templ EventList(events []services.Event) {
         <tbody>
             for _, event := range events {
                 <tr>
-                    <td>{event.Name}</td>
+                    <td><a href={templ.URL(fmt.Sprintf("/event/%d", event.Id))} hx-get={fmt.Sprintf("/event/%d", event.Id)} hx-target="#main-content" hx-swap="innerHTML" hx-push-url={fmt.Sprintf("/event/%d", event.Id)}>{event.Name}</a></td>
                     <td>{fmt.Sprintf("%d", event.Start)}</td>
                     <td>{fmt.Sprintf("%d", event.End)}</td>
                 </tr>

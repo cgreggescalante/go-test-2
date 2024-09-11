@@ -125,7 +125,9 @@ func (as *ActivityServices) GetRecentActivitiesByUser(user User, page int, pageS
 }
 
 func (as *ActivityServices) GetLeaderboard() ([]LeaderboardEntry, error) {
-	query := `SELECT u.first_name || ' ' || u.last_name, SUM(run_points) as points FROM activities JOIN main.users u on u.id = activities.user_id GROUP BY user_id ORDER BY points DESC`
+	query := `SELECT u.first_name || ' ' || u.last_name, 
+       			SUM(run_points + classic_roller_skiing_points + skate_roller_skiing_points + road_biking_points + mountain_biking_points + walking_points + hiking_with_packs_points + swimming_points + paddling_points + strength_training_points + aerobic_sports_points) 
+           		as points FROM activities JOIN main.users u on u.id = activities.user_id GROUP BY user_id ORDER BY points DESC`
 
 	statement, err := as.ActivityStore.Db.Prepare(query)
 	if err != nil {

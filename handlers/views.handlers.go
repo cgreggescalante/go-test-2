@@ -5,6 +5,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"go-test-2/views"
 	"go-test-2/views/auth"
+	"go-test-2/views/events"
+	"strconv"
 )
 
 func renderView(c echo.Context, cmp templ.Component) error {
@@ -63,5 +65,42 @@ func (ah *AuthHandler) eventsHandler(c echo.Context) error {
 		return err
 	}
 
-	return ah.rerenderBody(c, views.EventList(data))
+	return ah.rerenderBody(c, events.EventList(data))
+}
+
+func (ah *AuthHandler) eventHandler(c echo.Context) error {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		return err
+	}
+
+	data, err := ah.EventService.GetEvent(id)
+	if err != nil {
+		return err
+	}
+
+	registered := false
+
+	if ah.Authorized {
+		registered, err = ah.EventService.CheckRegistration(id, ah.UserService.User.ID)
+		if err != nil {
+			return err
+		}
+	}
+
+	return ah.rerenderBody(c, events.Event(data, ah.Authorized, registered))
+}
+
+func (ah *AuthHandler) registerEventHandler(c echo.Context) error {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		return err
+	}
+
+	err = ah.EventService.RegisterUser(id, ah.UserService.User.ID)
+	if err != nil {
+		return err
+	}
+
+	return renderView(c, events.RegistrationStatus(id, true, true))
 }

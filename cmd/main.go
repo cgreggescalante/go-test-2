@@ -32,8 +32,6 @@ func main() {
 	handlers.SetRoutes(e, ah)
 
 	e.Logger.Fatal(e.Start(":8080"))
-
-	//loadFromCSV()
 }
 
 func loadFromCSV() {

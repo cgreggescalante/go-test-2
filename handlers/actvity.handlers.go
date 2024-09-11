@@ -36,11 +36,31 @@ func (ah *AuthHandler) addActivityPostHandler(c echo.Context) error {
 	fmt.Println(ah.UserService.User.ID)
 
 	err := ah.ActivityService.CreateActivity(services.Activity{
-		UserId:      ah.UserService.User.ID,
-		Date:        time.Now().Unix(),
-		Description: c.FormValue("description"),
-		Run:         durations[0],
-		RunPoints:   durations[0],
+		UserId:                    ah.UserService.User.ID,
+		Date:                      time.Now().Unix(),
+		Description:               c.FormValue("description"),
+		Run:                       durations[0],
+		RunPoints:                 durations[0],
+		ClassicRollerSkiing:       durations[1],
+		ClassicRollerSkiingPoints: durations[1],
+		SkateRollerSkiing:         durations[2],
+		SkateRollerSkiingPoints:   durations[2],
+		RoadBiking:                durations[3],
+		RoadBikingPoints:          durations[3],
+		MountainBiking:            durations[4],
+		MountainBikingPoints:      durations[4],
+		Walking:                   durations[5],
+		WalkingPoints:             durations[5],
+		HikingWithPacks:           durations[6],
+		HikingWithPacksPoints:     durations[6],
+		Swimming:                  durations[7],
+		SwimmingPoints:            durations[7],
+		Paddling:                  durations[8],
+		PaddlingPoints:            durations[8],
+		StrengthTraining:          durations[9],
+		StrengthTrainingPoints:    durations[9],
+		AerobicSports:             durations[10],
+		AerobicSportsPoints:       durations[10],
 	})
 	if err != nil {
 		fmt.Println(err)

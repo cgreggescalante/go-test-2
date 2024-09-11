@@ -1,0 +1,32 @@
+package events
+
+import (
+    "fmt"
+    "time"
+    "go-test-2/services"
+)
+
+templ Event(event services.Event, authorized bool, registered bool) {
+    <h1>Event</h1>
+    <div id="registrationStatus">
+        @RegistrationStatus(event.Id, authorized, registered)
+    </div>
+    <div>
+        <div>Name: {event.Name}</div>
+        <div>Start: {time.Unix(event.Start, 0).Format(time.RFC1123)}</div>
+        <div>End: {time.Unix(event.End, 0).Format(time.RFC1123)}</div>
+    </div>
+}
+
+templ RegistrationStatus(eventId int64, authorized bool, registered bool) {
+    if authorized {
+        if registered {
+            <div>You are registered for this event</div>
+        } else {
+            <div>You are not registered for this event</div>
+            <button hx-post={fmt.Sprintf("/event/%d/register", eventId)} hx-swap="innerHTML" hx-target="#registrationStatus">Click here to register</button>
+        }
+    } else {
+        <div>You are not logged in</div>
+    }
+}
