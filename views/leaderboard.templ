@@ -1,0 +1,43 @@
+package views
+
+import (
+    "fmt"
+    "go-test-2/services"
+)
+
+templ Leaderboard(user services.User) {
+    <div>
+        Leaderboard
+
+        @LifetimeLeaderboard(user)
+    </div>
+}
+
+templ LifetimeLeaderboard(user services.User) {
+    <div>
+        Lifetime Leaderboard
+
+        <table>
+        <thead>
+            <tr>
+            <th>Rank</th>
+            <th>User</th>
+            <th>Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr hx-get="/getLeaderboard" hx-trigger="load" hx-swap="outerHTML"></tr>
+        </tbody>
+        </table>
+    </div>
+}
+
+templ LeaderboardBody(data []services.LeaderboardEntry) {
+    for _, entry := range data {
+        <tr>
+            <td>{fmt.Sprintf("%d", entry.Rank)}</td>
+            <td>{entry.UserName}</td>
+            <td>{fmt.Sprintf("%.2f", entry.Points)}</td>
+        </tr>
+    }
+}

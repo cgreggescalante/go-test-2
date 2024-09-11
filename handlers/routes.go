@@ -20,4 +20,7 @@ func SetRoutes(e *echo.Echo, ah *AuthHandler) {
 	e.POST("/signout", ah.signoutPostHandler)
 
 	e.GET("/activities", ah.getActivityHandler)
+
+	e.GET("/leaderboard", ah.leaderboardHandler)
+	e.GET("/getLeaderboard", ah.getLeaderboardHandler)
 }

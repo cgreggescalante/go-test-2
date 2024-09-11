@@ -43,3 +43,16 @@ func (ah *AuthHandler) loginHandler(c echo.Context) error {
 func (ah *AuthHandler) registerHandler(c echo.Context) error {
 	return ah.rerenderBody(c, auth.Register())
 }
+
+func (ah *AuthHandler) leaderboardHandler(c echo.Context) error {
+	return ah.rerenderBody(c, views.Leaderboard(ah.UserService.User))
+}
+
+func (ah *AuthHandler) getLeaderboardHandler(c echo.Context) error {
+	data, err := ah.ActivityService.GetLeaderboard()
+	if err != nil {
+		return err
+	}
+
+	return renderView(c, views.LeaderboardBody(data))
+}
