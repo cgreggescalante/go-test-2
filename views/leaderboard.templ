@@ -5,15 +5,7 @@ import (
     "go-test-2/services"
 )
 
-templ Leaderboard(user services.User) {
-    <div>
-        Leaderboard
-
-        @LifetimeLeaderboard(user)
-    </div>
-}
-
-templ LifetimeLeaderboard(user services.User) {
+templ Leaderboard(user services.User, data []services.LeaderboardEntry) {
     <div>
         Lifetime Leaderboard
 
@@ -26,18 +18,14 @@ templ LifetimeLeaderboard(user services.User) {
             </tr>
         </thead>
         <tbody>
-            <tr hx-get="/getLeaderboard" hx-trigger="load" hx-swap="outerHTML"></tr>
+            for _, entry := range data {
+                <tr>
+                    <td>{fmt.Sprintf("%d", entry.Rank)}</td>
+                    <td>{entry.UserName}</td>
+                    <td>{fmt.Sprintf("%.2f", entry.Points)}</td>
+                </tr>
+            }
         </tbody>
         </table>
     </div>
-}
-
-templ LeaderboardBody(data []services.LeaderboardEntry) {
-    for _, entry := range data {
-        <tr>
-            <td>{fmt.Sprintf("%d", entry.Rank)}</td>
-            <td>{entry.UserName}</td>
-            <td>{fmt.Sprintf("%.2f", entry.Points)}</td>
-        </tr>
-    }
 }

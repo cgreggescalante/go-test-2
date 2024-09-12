@@ -21,12 +21,11 @@ templ Event(event services.Event, authorized bool, registered bool) {
 templ RegistrationStatus(eventId int64, authorized bool, registered bool) {
     if authorized {
         if registered {
-            <div>You are registered for this event</div>
+            You are registered for this event
         } else {
-            <div>You are not registered for this event</div>
             <button hx-post={fmt.Sprintf("/event/%d/register", eventId)} hx-swap="innerHTML" hx-target="#registrationStatus">Click here to register</button>
         }
     } else {
-        <div>You are not logged in</div>
+        You are not logged in
     }
 }

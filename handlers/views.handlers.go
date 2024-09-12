@@ -15,14 +15,6 @@ func renderView(c echo.Context, cmp templ.Component) error {
 	return cmp.Render(c.Request().Context(), c.Response().Writer)
 }
 
-func (ah *AuthHandler) fullPageRender(c echo.Context, cmp templ.Component) error {
-	return renderView(c, views.Base(cmp, ah.UserService.User))
-}
-
-func (ah *AuthHandler) baseHandler(c echo.Context) error {
-	return ah.fullPageRender(c, views.Home(ah.Authorized))
-}
-
 func (ah *AuthHandler) rerenderBody(c echo.Context, cmp templ.Component) error {
 	if c.Request().Header.Get("HX-Request") != "" {
 		return renderView(c, cmp)
@@ -47,16 +39,12 @@ func (ah *AuthHandler) registerHandler(c echo.Context) error {
 }
 
 func (ah *AuthHandler) leaderboardHandler(c echo.Context) error {
-	return ah.rerenderBody(c, views.Leaderboard(ah.UserService.User))
-}
-
-func (ah *AuthHandler) getLeaderboardHandler(c echo.Context) error {
 	data, err := ah.ActivityService.GetLeaderboard()
 	if err != nil {
 		return err
 	}
 
-	return renderView(c, views.LeaderboardBody(data))
+	return ah.rerenderBody(c, views.Leaderboard(ah.UserService.User, data))
 }
 
 func (ah *AuthHandler) eventsHandler(c echo.Context) error {

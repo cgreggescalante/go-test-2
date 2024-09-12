@@ -5,7 +5,7 @@ import (
 )
 
 func SetRoutes(e *echo.Echo, ah *AuthHandler) {
-	e.GET("/", ah.baseHandler)
+	e.GET("/", ah.homeHandler)
 	e.GET("/home", ah.homeHandler)
 
 	e.GET("/addActivity", ah.addActivityHandler)
@@ -22,10 +22,10 @@ func SetRoutes(e *echo.Echo, ah *AuthHandler) {
 	e.GET("/activities", ah.getActivityHandler)
 
 	e.GET("/leaderboard", ah.leaderboardHandler)
-	e.GET("/getLeaderboard", ah.getLeaderboardHandler)
 
-	e.GET("/events", ah.eventsHandler)
-	e.GET("/event/:id", ah.eventHandler)
+	eventGroup := e.Group("/event")
 
-	e.POST("/event/:id/register", ah.registerEventHandler)
+	eventGroup.GET("", ah.eventsHandler)
+	eventGroup.GET("/:id", ah.eventHandler)
+	eventGroup.POST("/:id/register", ah.registerEventHandler)
 }
