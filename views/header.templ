@@ -1,21 +1,19 @@
 package views
 
-import "go-test-2/services"
-
-templ Header(user services.User) {
+templ Header(userName string, authorized bool) {
     <header style="border: 1px solid black; display: flex; justify-content: space-between">
         <span>
             <a href="/home" hx-get="/home" hx-target="#main-content" hx-swap="innerHTML" hx-push-url="/home">Home</a>
             <a href="/event" hx-get="/event" hx-target="#main-content" hx-swap="innerHTML" hx-push-url="/event">Events</a>
             <a href="/leaderboard" hx-get="/leaderboard" hx-target="#main-content" hx-swap="innerHTML" hx-push-url="/leaderboard">Leaderboard</a>
-            if (user.Email != "") {
+            if authorized {
                 <a href="/addActivity" hx-get="/addActivity" hx-target="#main-content" hx-swap="innerHTML" hx-push-url="/addActivity">Add Activity</a>
             }
         </span>
 
         <span>
-            if (user.Email != "") {
-                { user.FirstName }
+            if authorized {
+                { userName }
                 <a href="/home" hx-post="/signout" hx-target="#main-content" hx-swap="innerHTML" hx-push-url="/home">Sign Out</a>
             } else {
                 <a href="/login" hx-get="/login" hx-target="#main-content" hx-swap="innerHTML" hx-push-url="/login">Login</a>

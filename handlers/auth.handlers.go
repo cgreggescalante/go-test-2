@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"fmt"
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"go-test-2/services"
 	"go-test-2/views"
@@ -9,9 +12,16 @@ import (
 	"net/http"
 )
 
+const (
+	authSessionKey   = "auth-session"
+	authKey          = "auth"
+	userIdKey        = "user-id"
+	userFirstNameKey = "user-first-name"
+	userLastNameKey  = "user-last-name"
+)
+
 func NewAuthHandler(us *services.UserServices, as *services.ActivityServices, es *services.EventServices) *AuthHandler {
 	return &AuthHandler{
-		Authorized:      false,
 		UserService:     us,
 		ActivityService: as,
 		EventService:    es,
@@ -19,37 +29,84 @@ func NewAuthHandler(us *services.UserServices, as *services.ActivityServices, es
 }
 
 type AuthHandler struct {
-	Authorized      bool
 	UserService     *services.UserServices
 	ActivityService *services.ActivityServices
 	EventService    *services.EventServices
 }
 
-func (ah *AuthHandler) successfulPost(c echo.Context) error {
+// AuthMiddleware adds the user's session to the context. This middleware does not block unauthorized users.
+func (ah *AuthHandler) AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		sess, _ := session.Get(authSessionKey, c)
+
+		if auth, ok := sess.Values[authKey].(bool); !auth || !ok {
+			c.Set(authKey, false)
+
+			fmt.Println("Not authorized")
+
+			return next(c)
+		}
+
+		if userId, ok := sess.Values[userIdKey].(int64); userId != 0 && ok {
+			c.Set(userIdKey, userId)
+		}
+
+		if firstName, ok := sess.Values[userFirstNameKey].(string); firstName != "" && ok {
+			c.Set(userFirstNameKey, firstName)
+		}
+
+		if lastName, ok := sess.Values[userLastNameKey].(string); lastName != "" && ok {
+			c.Set(userLastNameKey, lastName)
+		}
+
+		c.Set(authKey, true)
+
+		fmt.Println("Authorized")
+
+		return next(c)
+	}
+}
+
+func (ah *AuthHandler) successfulPost(c echo.Context, userName string, authorized bool) error {
 	c.Response().Header().Set("HX-Push-URL", "/home")
 	c.Response().Header().Set("HX-Retarget", "body")
 	c.Response().Header().Set("HX-Reswap", "innerHTML")
 
-	return renderView(c, views.Base(views.Home(ah.Authorized), ah.UserService.User))
+	return renderView(c, views.Base(views.Home(authorized), userName, authorized))
 }
 
 func (ah *AuthHandler) loginPostHandler(c echo.Context) error {
 	user, err := ah.UserService.CheckEmail(c.FormValue("email"))
 	if err != nil {
-		return c.HTML(http.StatusOK, "Bad Email")
+		return c.HTML(http.StatusOK, "Bad Email / Password")
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(c.FormValue("password")))
-	if err != nil {
-		return c.HTML(http.StatusOK, "Wrong Password")
+	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(c.FormValue("password"))); err != nil {
+		return c.HTML(http.StatusOK, "Bad Email / Password")
 	}
 
 	log.Println("Logged in", user.FirstName, user.LastName)
 
-	ah.Authorized = true
-	ah.UserService.User = user
+	sess, _ := session.Get(authSessionKey, c)
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   3600,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	}
 
-	return ah.successfulPost(c)
+	sess.Values = map[interface{}]interface{}{
+		authKey:          true,
+		userIdKey:        user.ID,
+		userFirstNameKey: user.FirstName,
+		userLastNameKey:  user.LastName,
+	}
+	err = sess.Save(c.Request(), c.Response())
+	if err != nil {
+		return err
+	}
+
+	return ah.successfulPost(c, fmt.Sprintf("%s %s", user.FirstName, user.LastName), true)
 }
 
 func (ah *AuthHandler) registerPostHandler(c echo.Context) error {
@@ -75,7 +132,7 @@ func (ah *AuthHandler) registerPostHandler(c echo.Context) error {
 		return c.HTML(http.StatusOK, "Email is required")
 	}
 
-	err := ah.UserService.CreateUser(services.User{
+	userId, err := ah.UserService.CreateUser(services.User{
 		FirstName: firstName,
 		LastName:  lastName,
 		Email:     email,
@@ -85,19 +142,40 @@ func (ah *AuthHandler) registerPostHandler(c echo.Context) error {
 		return c.HTML(http.StatusOK, "Could not create account")
 	}
 
-	ah.Authorized = true
-	ah.UserService.User = services.User{
-		FirstName: firstName,
-		LastName:  lastName,
-		Email:     email,
+	sess, _ := session.Get(authSessionKey, c)
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   3600,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
 	}
 
-	return ah.successfulPost(c)
+	sess.Values = map[interface{}]interface{}{
+		authKey:          true,
+		userIdKey:        userId,
+		userFirstNameKey: firstName,
+		userLastNameKey:  lastName,
+	}
+	err = sess.Save(c.Request(), c.Response())
+	if err != nil {
+		return err
+	}
+
+	return ah.successfulPost(c, fmt.Sprintf("%s %s", firstName, lastName), true)
 }
 
 func (ah *AuthHandler) signoutPostHandler(c echo.Context) error {
-	ah.UserService.User = services.User{}
-	ah.Authorized = false
+	sess, _ := session.Get(authSessionKey, c)
+	sess.Values = map[interface{}]interface{}{
+		authKey:          false,
+		userIdKey:        0,
+		userFirstNameKey: "",
+		userLastNameKey:  "",
+	}
+	err := sess.Save(c.Request(), c.Response())
+	if err != nil {
+		return err
+	}
 
-	return ah.successfulPost(c)
+	return ah.successfulPost(c, "", false)
 }

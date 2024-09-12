@@ -14,28 +14,30 @@ type User struct {
 }
 
 type UserServices struct {
-	User      User
 	UserStore db.Store
 }
 
-func NewUserService(u User, userStore db.Store) *UserServices {
+func NewUserService(userStore db.Store) *UserServices {
 	return &UserServices{
-		User:      u,
 		UserStore: userStore,
 	}
 }
 
-func (us *UserServices) CreateUser(u User) error {
+func (us *UserServices) CreateUser(u User) (int64, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), 8)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	statement := `INSERT INTO users (email, password, first_name, last_name) VALUES (?, ?, ?, ?)`
 
-	_, err = us.UserStore.Db.Exec(statement, u.Email, string(hashedPassword), u.FirstName, u.LastName)
+	result, err := us.UserStore.Db.Exec(statement, u.Email, string(hashedPassword), u.FirstName, u.LastName)
+	if err != nil {
+		return 0, err
+	}
 
-	return err
+	userId, err := result.LastInsertId()
+	return userId, err
 }
 
 func (us *UserServices) CheckEmail(email string) (User, error) {
@@ -48,11 +50,13 @@ func (us *UserServices) CheckEmail(email string) (User, error) {
 
 	defer statement.Close()
 
-	us.User.Email = email
-	err = statement.QueryRow(us.User.Email).Scan(&us.User.ID, &us.User.Email, &us.User.Password, &us.User.FirstName, &us.User.LastName)
+	user := User{}
+
+	user.Email = email
+	err = statement.QueryRow(user.Email).Scan(&user.ID, &user.Email, &user.Password, &user.FirstName, &user.LastName)
 	if err != nil {
 		return User{}, err
 	}
 
-	return us.User, nil
+	return user, nil
 }

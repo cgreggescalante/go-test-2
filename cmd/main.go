@@ -5,29 +5,43 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
+
 	"go-test-2/db"
 	"go-test-2/handlers"
 	"go-test-2/services"
+
 	"io"
 	"os"
 	"strings"
 	"time"
 )
 
+// DbName TODO: move to env file
+const (
+	DbName    = "gotest2.sqlite"
+	SecretKey = "secret"
+)
+
 func main() {
 	e := echo.New()
 
 	e.Use(middleware.Logger())
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte(SecretKey))))
 
-	store, err := db.NewStore("gotest2.sqlite")
+	store, err := db.NewStore(DbName)
 	if err != nil {
 		e.Logger.Fatalf("Failed to create store: %s", err)
 	}
 
-	us := services.NewUserService(services.User{}, store)
+	us := services.NewUserService(store)
 	as := services.NewActivityService(store)
 	es := services.NewEventService(store)
 	ah := handlers.NewAuthHandler(us, as, es)
+
+	e.Use(ah.AuthMiddleware)
 
 	handlers.SetRoutes(e, ah)
 
@@ -49,7 +63,7 @@ func loadFromCSV() {
 		fmt.Printf("Failed to unmarshal JSON: %s", err)
 	}
 
-	store, _ := db.NewStore("gotest2.sqlite")
+	store, _ := db.NewStore(DbName)
 
 	groupedByUser := make(map[string][]map[string]any)
 

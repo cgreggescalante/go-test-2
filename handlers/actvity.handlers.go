@@ -11,7 +11,8 @@ import (
 )
 
 func (ah *AuthHandler) addActivityPostHandler(c echo.Context) error {
-	if !ah.Authorized {
+	userId, ok := c.Get(userIdKey).(int64)
+	if !ok {
 		return c.HTML(http.StatusOK, "Not authenticated")
 	}
 
@@ -33,10 +34,8 @@ func (ah *AuthHandler) addActivityPostHandler(c echo.Context) error {
 		return c.HTML(http.StatusOK, "Cannot upload activities with no values!!")
 	}
 
-	fmt.Println(ah.UserService.User.ID)
-
 	err := ah.ActivityService.CreateActivity(services.Activity{
-		UserId:                    ah.UserService.User.ID,
+		UserId:                    userId,
 		Date:                      time.Now().Unix(),
 		Description:               c.FormValue("description"),
 		Run:                       durations[0],
@@ -90,7 +89,14 @@ func (ah *AuthHandler) getActivityHandler(c echo.Context) error {
 	if user == "all" {
 		activities, err = ah.ActivityService.GetRecentActivities(page, pageSize)
 	} else {
-		activities, err = ah.ActivityService.GetRecentActivitiesByUser(ah.UserService.User, page, pageSize)
+		userId, ok := c.Get(userIdKey).(int64)
+		if !ok {
+			return c.HTML(http.StatusOK, "Not authenticated")
+		}
+		firstName, _ := c.Get(userFirstNameKey).(string)
+		lastName, _ := c.Get(userLastNameKey).(string)
+
+		activities, err = ah.ActivityService.GetRecentActivitiesByUser(services.User{ID: userId, FirstName: firstName, LastName: lastName}, page, pageSize)
 	}
 	if err != nil {
 		fmt.Println(err)
