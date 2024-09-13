@@ -16,7 +16,7 @@ func (ah *AuthHandler) addActivityPostHandler(c echo.Context) error {
 		return c.HTML(http.StatusOK, "Not authenticated")
 	}
 
-	durations := make([]float64, 0, len(services.ActivityTypes))
+	durations := map[string]float64{}
 	foundIncluded := false
 
 	for _, item := range services.ActivityTypes {
@@ -24,7 +24,7 @@ func (ah *AuthHandler) addActivityPostHandler(c echo.Context) error {
 		if err != nil {
 			return c.HTML(http.StatusOK, fmt.Sprintf("Bad input for %s duration", item))
 		}
-		durations = append(durations, duration)
+		durations[item] = duration
 		if duration > 0 {
 			foundIncluded = true
 		}
@@ -38,28 +38,28 @@ func (ah *AuthHandler) addActivityPostHandler(c echo.Context) error {
 		UserId:                    userId,
 		Date:                      time.Now().Unix(),
 		Description:               c.FormValue("description"),
-		Run:                       durations[0],
-		RunPoints:                 durations[0],
-		ClassicRollerSkiing:       durations[1],
-		ClassicRollerSkiingPoints: durations[1],
-		SkateRollerSkiing:         durations[2],
-		SkateRollerSkiingPoints:   durations[2],
-		RoadBiking:                durations[3],
-		RoadBikingPoints:          durations[3],
-		MountainBiking:            durations[4],
-		MountainBikingPoints:      durations[4],
-		Walking:                   durations[5],
-		WalkingPoints:             durations[5],
-		HikingWithPacks:           durations[6],
-		HikingWithPacksPoints:     durations[6],
-		Swimming:                  durations[7],
-		SwimmingPoints:            durations[7],
-		Paddling:                  durations[8],
-		PaddlingPoints:            durations[8],
-		StrengthTraining:          durations[9],
-		StrengthTrainingPoints:    durations[9],
-		AerobicSports:             durations[10],
-		AerobicSportsPoints:       durations[10],
+		Run:                       durations["Run"],
+		RunPoints:                 durations["Run"],
+		ClassicRollerSkiing:       durations["Classic Roller Skiing"],
+		ClassicRollerSkiingPoints: durations["Classic Roller Skiing"],
+		SkateRollerSkiing:         durations["Skate Roller Skiing"],
+		SkateRollerSkiingPoints:   durations["Skate Roller Skiing"],
+		RoadBiking:                durations["Road Biking"],
+		RoadBikingPoints:          durations["Road Biking"],
+		MountainBiking:            durations["Mountain Biking"],
+		MountainBikingPoints:      durations["Mountain Biking"],
+		Walking:                   durations["Walking"],
+		WalkingPoints:             durations["Walking"],
+		HikingWithPacks:           durations["Hiking With Packs"],
+		HikingWithPacksPoints:     durations["Hiking With Packs"],
+		Swimming:                  durations["Swimming"],
+		SwimmingPoints:            durations["Swimming"],
+		Paddling:                  durations["Paddling"],
+		PaddlingPoints:            durations["Paddling"],
+		StrengthTraining:          durations["Strength Training"],
+		StrengthTrainingPoints:    durations["Strength Training"],
+		AerobicSports:             durations["Aerobic Sports"],
+		AerobicSportsPoints:       durations["Aerobic Sports"],
 	})
 	if err != nil {
 		fmt.Println(err)

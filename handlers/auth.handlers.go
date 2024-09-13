@@ -78,6 +78,7 @@ func (ah *AuthHandler) successfulPost(c echo.Context, userName string, authorize
 func (ah *AuthHandler) loginPostHandler(c echo.Context) error {
 	user, err := ah.UserService.CheckEmail(c.FormValue("email"))
 	if err != nil {
+		fmt.Println("Error checking email", err)
 		return c.HTML(http.StatusOK, "Bad Email / Password")
 	}
 

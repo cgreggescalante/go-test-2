@@ -53,21 +53,12 @@ func (es *EventServices) GetEvent(id int64) (Event, error) {
 }
 
 func (es *EventServices) GetEvents() ([]Event, error) {
-	rows, err := es.EventStore.Db.Query(`SELECT id, name, description, start, end, registration_start, registration_end FROM events;`)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
+	query := "SELECT id, name, description, start, end, registration_start, registration_end FROM events;"
 
 	var events []Event
-	for rows.Next() {
-		var event Event
-		err := rows.Scan(&event.Id, &event.Name, &event.Description, &event.Start, &event.End, &event.RegistrationStart, &event.RegistrationEnd)
-		if err != nil {
-			return nil, err
-		}
 
-		events = append(events, event)
+	if err := es.EventStore.Db.Select(&events, query); err != nil {
+		return []Event{}, err
 	}
 
 	return events, nil

@@ -131,8 +131,7 @@ func (as *ActivityServices) GetLeaderboard() ([]LeaderboardEntry, error) {
 
 	var data []LeaderboardEntry
 
-	err := as.ActivityStore.Db.Select(&data, query)
-	if err != nil {
+	if err := as.ActivityStore.Db.Select(&data, query); err != nil {
 		return nil, err
 	}
 
