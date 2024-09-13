@@ -120,5 +120,5 @@ func (ah *AuthHandler) registerEventHandler(c echo.Context) error {
 		return err
 	}
 
-	return renderView(c, events.RegistrationStatus(id, true, true))
+	return renderView(c, events.RegistrationStatus(id, true, true, true))
 }

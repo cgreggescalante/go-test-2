@@ -9,7 +9,7 @@ import (
 templ Event(event services.Event, authorized bool, registered bool) {
     <h1>Event</h1>
     <div id="registrationStatus">
-        @RegistrationStatus(event.Id, authorized, registered)
+        @RegistrationStatus(event.Id, authorized, registered, registrationOpen(event))
     </div>
     <div>
         <div>Name: {event.Name}</div>
@@ -18,14 +18,19 @@ templ Event(event services.Event, authorized bool, registered bool) {
     </div>
 }
 
-templ RegistrationStatus(eventId int64, authorized bool, registered bool) {
-    if authorized {
-        if registered {
-            You are registered for this event
-        } else {
-            <button hx-post={fmt.Sprintf("/event/%d/register", eventId)} hx-swap="innerHTML" hx-target="#registrationStatus">Click here to register</button>
-        }
-    } else {
+func registrationOpen(event services.Event) bool {
+    now := time.Now().Unix()
+    return event.RegistrationStart < now && now < event.RegistrationEnd
+}
+
+templ RegistrationStatus(eventId int64, authorized bool, registered bool, canRegister bool) {
+    if !authorized {
         You are not logged in
+    } else if registered {
+        You are registered for this event
+    } else if canRegister {
+        <button hx-post={fmt.Sprintf("/event/%d/register", eventId)} hx-swap="innerHTML" hx-target="#registrationStatus">Click here to register</button>
+    } else {
+        Registration is closed
     }
 }
