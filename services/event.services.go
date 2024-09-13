@@ -1,7 +1,10 @@
 package services
 
 import (
+	"errors"
+	"fmt"
 	"go-test-2/db"
+	"time"
 )
 
 type Event struct {
@@ -32,6 +35,14 @@ func NewEventService(eventStore db.Store) *EventServices {
 }
 
 func (es *EventServices) RegisterUser(eventId int64, userId int64) error {
+	var event Event
+	if err := es.EventStore.Db.Get(&event, `SELECT * FROM events WHERE id = ?;`, eventId); err != nil {
+		return err
+	}
+
+	if event.RegistrationStart > time.Now().Unix() || event.RegistrationEnd < time.Now().Unix() {
+		return errors.New(fmt.Sprintf("Registration closed for event %d", eventId))
+	}
 	statement := `INSERT INTO eventRegistrations (event_id, user_id) VALUES (?, ?);`
 
 	_, err := es.EventStore.Db.Exec(statement, eventId, userId)
