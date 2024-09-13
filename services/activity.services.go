@@ -36,7 +36,7 @@ type Activity struct {
 }
 
 type LeaderboardEntry struct {
-	UserName string
+	UserName string `db:"user_name"`
 	Points   float64
 	Rank     int
 }
@@ -125,32 +125,24 @@ func (as *ActivityServices) GetRecentActivitiesByUser(user User, page int, pageS
 }
 
 func (as *ActivityServices) GetLeaderboard() ([]LeaderboardEntry, error) {
-	query := `SELECT u.first_name || ' ' || u.last_name, 
+	query := `SELECT u.first_name || ' ' || u.last_name as user_name, 
        			SUM(run_points + classic_roller_skiing_points + skate_roller_skiing_points + road_biking_points + mountain_biking_points + walking_points + hiking_with_packs_points + swimming_points + paddling_points + strength_training_points + aerobic_sports_points) 
            		as points FROM activities JOIN main.users u on u.id = activities.user_id GROUP BY user_id ORDER BY points DESC`
 
-	statement, err := as.ActivityStore.Db.Prepare(query)
+	var data []LeaderboardEntry
+
+	err := as.ActivityStore.Db.Select(&data, query)
 	if err != nil {
-		return []LeaderboardEntry{}, err
+		return nil, err
 	}
 
-	rows, err := statement.Query()
-	if err != nil {
-		return []LeaderboardEntry{}, err
-	}
-
-	var result []LeaderboardEntry
-	rank := 1
-	for rows.Next() {
-		var entry LeaderboardEntry
-		err = rows.Scan(&entry.UserName, &entry.Points)
-		if err != nil {
-			return []LeaderboardEntry{}, err
+	for i := 0; i < len(data); i++ {
+		if i > 0 && data[i].Points == data[i-1].Points {
+			data[i].Rank = data[i-1].Rank
+			continue
 		}
-		entry.Rank = rank
-		rank++
-		result = append(result, entry)
+		data[i].Rank = i + 1
 	}
 
-	return result, nil
+	return data, nil
 }
