@@ -5,11 +5,11 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
-	"go-test-2/services"
-	"go-test-2/views"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
+	"nff-go-htmx/services"
+	"nff-go-htmx/views"
 )
 
 const (

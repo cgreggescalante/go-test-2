@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
-	"go-test-2/views"
-	"go-test-2/views/auth"
-	"go-test-2/views/events"
+	"nff-go-htmx/views"
+	"nff-go-htmx/views/auth"
+	"nff-go-htmx/views/events"
 	"strconv"
 )
 

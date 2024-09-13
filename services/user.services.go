@@ -1,8 +1,8 @@
 package services
 
 import (
-	"go-test-2/db"
 	"golang.org/x/crypto/bcrypt"
+	"nff-go-htmx/db"
 )
 
 type User struct {

@@ -3,9 +3,9 @@ package handlers
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
-	"go-test-2/services"
-	"go-test-2/views/partials"
 	"net/http"
+	"nff-go-htmx/services"
+	"nff-go-htmx/views/partials"
 	"strconv"
 	"time"
 )

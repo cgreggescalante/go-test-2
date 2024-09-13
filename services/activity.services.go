@@ -1,7 +1,7 @@
 package services
 
 import (
-	"go-test-2/db"
+	"nff-go-htmx/db"
 )
 
 var ActivityTypes = [...]string{"Run", "Classic Roller Skiing", "Skate Roller Skiing", "Road Biking", "Mountain Biking", "Walking", "Hiking With Packs", "Swimming", "Paddling", "Strength Training", "Aerobic Sports"}

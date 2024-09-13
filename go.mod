@@ -1,4 +1,4 @@
-module go-test-2
+module nff-go-htmx
 
 go 1.23.0
 

@@ -9,9 +9,9 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 
-	"go-test-2/db"
-	"go-test-2/handlers"
-	"go-test-2/services"
+	"nff-go-htmx/db"
+	"nff-go-htmx/handlers"
+	"nff-go-htmx/services"
 
 	"io"
 	"os"

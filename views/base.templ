@@ -1,5 +1,7 @@
 package views
 
+import "nff-go-htmx/views/partials"
+
 templ Base(cmp templ.Component, userName string, authorized bool) {
     <!DOCTYPE html>
     <html lang="en">
@@ -11,7 +13,7 @@ templ Base(cmp templ.Component, userName string, authorized bool) {
             <title>Go Test 2</title>
         </head>
         <body>
-            @Header(userName, authorized)
+            @partials.Header(userName, authorized)
             <main id="main-content" style="border: 1px solid black">
                 @cmp
             </main>

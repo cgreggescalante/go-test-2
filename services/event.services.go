@@ -3,7 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
-	"go-test-2/db"
+	"nff-go-htmx/db"
 	"time"
 )
 
