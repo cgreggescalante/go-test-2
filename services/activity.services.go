@@ -36,9 +36,9 @@ type Activity struct {
 }
 
 type LeaderboardEntry struct {
-	UserName string `db:"user_name"`
-	Points   float64
-	Rank     int
+	User
+	Points float64
+	Rank   int
 }
 
 type ActivityWithUser struct {
@@ -125,7 +125,7 @@ func (as *ActivityServices) GetRecentActivitiesByUser(user User, page int, pageS
 }
 
 func (as *ActivityServices) GetLeaderboard() ([]LeaderboardEntry, error) {
-	query := `SELECT u.first_name || ' ' || u.last_name as user_name, 
+	query := `SELECT u.*,
        			SUM(run_points + classic_roller_skiing_points + skate_roller_skiing_points + road_biking_points + mountain_biking_points + walking_points + hiking_with_packs_points + swimming_points + paddling_points + strength_training_points + aerobic_sports_points) 
            		as points FROM activities JOIN main.users u on u.id = activities.user_id GROUP BY user_id ORDER BY points DESC`
 

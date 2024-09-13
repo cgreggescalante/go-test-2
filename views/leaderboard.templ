@@ -21,7 +21,7 @@ templ Leaderboard(data []services.LeaderboardEntry) {
             for _, entry := range data {
                 <tr>
                     <td>{fmt.Sprintf("%d", entry.Rank)}</td>
-                    <td>{entry.UserName}</td>
+                    <td>{entry.FirstName} {entry.LastName} {fmt.Sprintf("%d", entry.ID)}</td>
                     <td>{fmt.Sprintf("%.2f", entry.Points)}</td>
                 </tr>
             }
