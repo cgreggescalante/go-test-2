@@ -44,7 +44,8 @@
 {{ end }}
 
 {{ define "recentActivitiesBlock" }}
-{{ range .Activities }}
+    {{- /*gotype: nff-go-htmx/handlers.RecentActivitiesBlockData*/ -}}
+    {{ range .Activities }}
     <tr>
         <td>{{ .FirstName }} {{ .LastName }}</td>
         <td>{{ .Date }}</td>

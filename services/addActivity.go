@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"github.com/jmoiron/sqlx"
 	"nff-go-htmx/models"
 )
@@ -34,10 +33,6 @@ func AddActivity(db *sqlx.DB, activity models.Activity) error {
 						:strength_training, :strength_training_points,
 						:aerobic_sports, :aerobic_sports_points
 					);`, activity)
-
-	if err != nil {
-		fmt.Printf("Error in AddActivity: %v\n", err)
-	}
 
 	return err
 }
