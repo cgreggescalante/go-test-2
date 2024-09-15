@@ -9,6 +9,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"html/template"
 	"net/http"
+	"nff-go-htmx/config"
+	"nff-go-htmx/handlers"
 	"nff-go-htmx/models"
 	"nff-go-htmx/services"
 	"path/filepath"
@@ -23,20 +25,6 @@ import (
 	"os"
 	"strings"
 	"time"
-)
-
-// DbName TODO: move to env file
-const (
-	DbName    = "gotest2.sqlite"
-	SecretKey = "secret"
-)
-
-const (
-	AuthSessionKey   = "auth-session"
-	AuthKey          = "auth"
-	UserIdKey        = "user-id"
-	UserFirstNameKey = "user-first-name"
-	UserLastNameKey  = "user-last-name"
 )
 
 type UserData struct {
@@ -54,13 +42,13 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 		return t.templates.ExecuteTemplate(w, name, data)
 	}
 
-	authorized, ok := c.Get(AuthKey).(bool)
+	authorized, ok := c.Get(config.AuthKey).(bool)
 	if !ok {
 		authorized = false
 	}
 
-	firstName, _ := c.Get(UserFirstNameKey).(string)
-	lastName, _ := c.Get(UserLastNameKey).(string)
+	firstName, _ := c.Get(config.UserFirstNameKey).(string)
+	lastName, _ := c.Get(config.UserLastNameKey).(string)
 
 	return t.templates.ExecuteTemplate(w, "layout", struct {
 		UserData
@@ -77,62 +65,8 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	})
 }
 
-func Home(c echo.Context) error {
-	authorized, ok := c.Get(AuthKey).(bool)
-	if !ok {
-		authorized = false
-	}
-
-	return c.Render(http.StatusOK, "home", struct{ Authorized bool }{authorized})
-}
-
-func Login(c echo.Context) error {
-	return c.Render(http.StatusOK, "login", nil)
-}
-
 func Register(c echo.Context) error {
 	return c.Render(http.StatusOK, "register", nil)
-}
-
-func CreateLoginPostHandler(db *sqlx.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		email := c.FormValue("email")
-		password := c.FormValue("password")
-
-		var user models.User
-		checkEmailErr := db.Get(&user, "SELECT id, email, password, first_name, last_name FROM users WHERE email = ?", email)
-		checkPasswordErr := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-
-		if checkEmailErr != nil || checkPasswordErr != nil {
-			return c.HTML(http.StatusOK, "Bad Email / Password")
-		}
-
-		sess, _ := session.Get(AuthSessionKey, c)
-		sess.Options = &sessions.Options{
-			Path:     "/",
-			MaxAge:   3600,
-			HttpOnly: true,
-			SameSite: http.SameSiteStrictMode,
-		}
-
-		fmt.Println("Logged in", user.FirstName, user.LastName)
-
-		sess.Values = map[interface{}]interface{}{
-			AuthKey:          true,
-			UserIdKey:        user.ID,
-			UserFirstNameKey: user.FirstName,
-			UserLastNameKey:  user.LastName,
-		}
-
-		err := sess.Save(c.Request(), c.Response())
-		if err != nil {
-			return err
-		}
-
-		c.Response().Header().Set("HX-Redirect", "/")
-
-		return nil
-	}
 }
 
 func CreateRegisterPostHandler(db *sqlx.DB) echo.HandlerFunc {
@@ -175,7 +109,7 @@ func CreateRegisterPostHandler(db *sqlx.DB) echo.HandlerFunc {
 			return err
 		}
 
-		sess, _ := session.Get(AuthSessionKey, c)
+		sess, _ := session.Get(config.AuthSessionKey, c)
 		sess.Options = &sessions.Options{
 			Path:     "/",
 			MaxAge:   3600,
@@ -184,10 +118,10 @@ func CreateRegisterPostHandler(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		sess.Values = map[interface{}]interface{}{
-			AuthKey:          true,
-			UserIdKey:        userId,
-			UserFirstNameKey: firstName,
-			UserLastNameKey:  lastName,
+			config.AuthKey:          true,
+			config.UserIdKey:        userId,
+			config.UserFirstNameKey: firstName,
+			config.UserLastNameKey:  lastName,
 		}
 
 		err = sess.Save(c.Request(), c.Response())
@@ -202,12 +136,12 @@ func CreateRegisterPostHandler(db *sqlx.DB) echo.HandlerFunc {
 }
 
 func SignOut(c echo.Context) error {
-	sess, _ := session.Get(AuthSessionKey, c)
+	sess, _ := session.Get(config.AuthSessionKey, c)
 	sess.Values = map[interface{}]interface{}{
-		AuthKey:          false,
-		UserIdKey:        0,
-		UserFirstNameKey: "",
-		UserLastNameKey:  "",
+		config.AuthKey:          false,
+		config.UserIdKey:        0,
+		config.UserFirstNameKey: "",
+		config.UserLastNameKey:  "",
 	}
 	err := sess.Save(c.Request(), c.Response())
 	if err != nil {
@@ -246,12 +180,12 @@ func CreateEventHandler(db *sqlx.DB) echo.HandlerFunc {
 			return err
 		}
 
-		authorized, ok := c.Get(AuthKey).(bool)
+		authorized, ok := c.Get(config.AuthKey).(bool)
 		if !ok {
 			authorized = false
 		}
 
-		userId, ok := c.Get(UserIdKey).(int64)
+		userId, ok := c.Get(config.UserIdKey).(int64)
 		if !ok {
 			userId = 0
 		}
@@ -277,68 +211,6 @@ func CreateEventHandler(db *sqlx.DB) echo.HandlerFunc {
 	}
 }
 
-type RecentActivitiesBlockData struct {
-	Activities []models.ActivityWithUser
-	More       bool
-	Page       int
-	PageSize   int
-	Filter     string
-}
-
-func CreateActivityListHandler(db *sqlx.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		page, err := strconv.Atoi(c.QueryParam("page"))
-		if err != nil {
-			page = 1
-			fmt.Printf("Failed to parse page: %s", err)
-		}
-
-		pageSize, err := strconv.Atoi(c.QueryParam("pageSize"))
-		if err != nil {
-			pageSize = 10
-			fmt.Printf("Failed to parse pageSize: %s", err)
-		}
-
-		filter := c.QueryParam("user")
-		if filter == "" {
-			filter = "all"
-		}
-
-		var data = RecentActivitiesBlockData{
-			PageSize: pageSize,
-			Page:     page + 1,
-			Filter:   filter,
-		}
-
-		if filter == "all" {
-			if err := db.Select(&data.Activities, "SELECT u.first_name, u.last_name, activities.* FROM activities JOIN main.users u on u.id = activities.user_id ORDER BY date DESC LIMIT ? OFFSET ?", pageSize, (page-1)*pageSize); err != nil {
-				return err
-			}
-		} else {
-			userId, ok := c.Get(UserIdKey).(int64)
-			if !ok {
-				return c.HTML(http.StatusOK, "Not authenticated")
-			}
-
-			firstName := c.Get(UserFirstNameKey).(string)
-			lastName := c.Get(UserLastNameKey).(string)
-
-			if err := db.Select(&data.Activities, "SELECT * FROM activities WHERE user_id = ? ORDER BY date DESC LIMIT ? OFFSET ?", userId, pageSize, (page-1)*pageSize); err != nil {
-				return err
-			}
-
-			for i := 0; i < len(data.Activities); i++ {
-				data.Activities[i].FirstName = firstName
-				data.Activities[i].LastName = lastName
-			}
-		}
-
-		data.More = data.Activities != nil && len(data.Activities) == pageSize
-
-		return c.Render(http.StatusOK, "recentActivitiesBlock", data)
-	}
-}
-
 type AddActivityData struct {
 	ActivityTypes []string
 }
@@ -349,7 +221,7 @@ func AddActivity(c echo.Context) error {
 
 func CreateActivityPostHandler(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userId, ok := c.Get(UserIdKey).(int64)
+		userId, ok := c.Get(config.UserIdKey).(int64)
 		if !ok {
 			return c.HTML(http.StatusOK, "Not authenticated")
 		}
@@ -428,22 +300,23 @@ func CreateEventRegistrationHandler(db *sqlx.DB) echo.HandlerFunc {
 			return err
 		}
 
-		userId, ok := c.Get(UserIdKey).(int64)
+		userId, ok := c.Get(config.UserIdKey).(int64)
 		if !ok {
 			return c.HTML(http.StatusOK, "You must be logged in to register for this event.")
 		}
 
-		var event models.Event
-		if err := db.Get(&event, "SELECT * FROM events WHERE id = ?;", eventId); err != nil {
-			return err
+		registrationOpen, err := services.CheckRegistrationOpen(db, eventId)
+		if err != nil {
+			fmt.Printf("Error in CreateEventRegistrationHandler: %v\n", err)
+			return c.HTML(http.StatusOK, "Could not register.")
+		}
+		if !registrationOpen {
+			return c.HTML(http.StatusOK, "Registration is not open for this event.")
 		}
 
-		if event.RegistrationStart > time.Now().Unix() || event.RegistrationEnd < time.Now().Unix() {
-			return c.HTML(http.StatusOK, "Registration is not open.")
-		}
-
-		if _, err = db.Exec(`INSERT INTO eventRegistrations (event_id, user_id) VALUES (?, ?);`, eventId, userId); err != nil {
-			return err
+		if err := services.RegisterUserForEvent(db, eventId, userId); err != nil {
+			fmt.Printf("Error in CreateEventRegistrationHandler: %v\n", err)
+			return c.HTML(http.StatusOK, "Could not register.")
 		}
 
 		return c.HTML(http.StatusOK, "You are registered for this event.")
@@ -452,27 +325,27 @@ func CreateEventRegistrationHandler(db *sqlx.DB) echo.HandlerFunc {
 
 func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		sess, _ := session.Get(AuthSessionKey, c)
+		sess, _ := session.Get(config.AuthSessionKey, c)
 
-		if auth, ok := sess.Values[AuthKey].(bool); !auth || !ok {
-			c.Set(AuthKey, false)
+		if auth, ok := sess.Values[config.AuthKey].(bool); !auth || !ok {
+			c.Set(config.AuthKey, false)
 
 			return next(c)
 		}
 
-		if userId, ok := sess.Values[UserIdKey].(int64); userId != 0 && ok {
-			c.Set(UserIdKey, userId)
+		if userId, ok := sess.Values[config.UserIdKey].(int64); userId != 0 && ok {
+			c.Set(config.UserIdKey, userId)
 		}
 
-		if firstName, ok := sess.Values[UserFirstNameKey].(string); firstName != "" && ok {
-			c.Set(UserFirstNameKey, firstName)
+		if firstName, ok := sess.Values[config.UserFirstNameKey].(string); firstName != "" && ok {
+			c.Set(config.UserFirstNameKey, firstName)
 		}
 
-		if lastName, ok := sess.Values[UserLastNameKey].(string); lastName != "" && ok {
-			c.Set(UserLastNameKey, lastName)
+		if lastName, ok := sess.Values[config.UserLastNameKey].(string); lastName != "" && ok {
+			c.Set(config.UserLastNameKey, lastName)
 		}
 
-		c.Set(AuthKey, true)
+		c.Set(config.AuthKey, true)
 
 		return next(c)
 	}
@@ -500,9 +373,9 @@ func CreateRoutes(e *echo.Echo, Db *sqlx.DB) {
 
 	e.Renderer = t
 
-	e.GET("/", Home)
-	e.GET("/home", Home)
-	e.GET("/activities", CreateActivityListHandler(Db))
+	e.GET("/", handlers.Home)
+	e.GET("/home", handlers.Home)
+	e.GET("/activities", handlers.CreateActivityListHandler(Db))
 	e.GET("/addActivity", AddActivity)
 	e.POST("/addActivity", CreateActivityPostHandler(Db))
 
@@ -512,11 +385,12 @@ func CreateRoutes(e *echo.Echo, Db *sqlx.DB) {
 	e.GET("/event/:id", CreateEventHandler(Db))
 	e.POST("/event/:id/register", CreateEventRegistrationHandler(Db))
 
-	e.GET("/login", Login)
-	e.GET("/register", Register)
+	e.GET("/login", handlers.Login)
+	e.POST("/login", handlers.CreateLoginPostHandler(Db))
 
-	e.POST("/login", CreateLoginPostHandler(Db))
+	e.GET("/register", Register)
 	e.POST("/register", CreateRegisterPostHandler(Db))
+
 	e.POST("/signout", SignOut)
 }
 
@@ -524,9 +398,9 @@ func main() {
 	e := echo.New()
 
 	e.Use(middleware.Logger())
-	e.Use(session.Middleware(sessions.NewCookieStore([]byte(SecretKey))))
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte(config.SecretKey))))
 
-	Db, err := db.NewStore(DbName)
+	Db, err := db.NewStore(config.DbName)
 	if err != nil {
 		e.Logger.Fatalf("Failed to create store: %s", err)
 	}
@@ -553,7 +427,7 @@ func loadFromCSV() {
 		fmt.Printf("Failed to unmarshal JSON: %s", err)
 	}
 
-	Db, _ := db.NewStore(DbName)
+	Db, _ := db.NewStore(config.DbName)
 
 	groupedByUser := make(map[string][]map[string]any)
 
