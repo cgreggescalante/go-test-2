@@ -10,6 +10,7 @@ import (
 	"html/template"
 	"net/http"
 	"nff-go-htmx/models"
+	"nff-go-htmx/services"
 	"path/filepath"
 	"strconv"
 
@@ -359,6 +360,7 @@ func CreateActivityPostHandler(db *sqlx.DB) echo.HandlerFunc {
 		for _, item := range models.ActivityTypes {
 			duration, err := strconv.ParseFloat("0"+c.FormValue(item), 32)
 			if err != nil {
+				fmt.Printf("Error in CreateActivityPostHandler: %v\n", err)
 				return c.HTML(http.StatusOK, fmt.Sprintf("Bad input for %s duration", item))
 			}
 			durations[item] = duration
@@ -399,35 +401,8 @@ func CreateActivityPostHandler(db *sqlx.DB) echo.HandlerFunc {
 			AerobicSportsPoints:       durations["Aerobic Sports"],
 		}
 
-		_, err := db.NamedExec(`INSERT INTO activities (
-		               user_id, date, description,
-		               run, run_points,
-		               classic_roller_skiing, classic_roller_skiing_points,
-		               skate_roller_skiing, skate_roller_skiing_points,
-		               road_biking, road_biking_points,
-		               mountain_biking, mountain_biking_points,
-		               walking, walking_points,
-		               hiking_with_packs, hiking_with_packs_points,
-		               swimming, swimming_points,
-		               paddling, paddling_points,
-		               strength_training, strength_training_points,
-		               aerobic_sports, aerobic_sports_points
-					) VALUES (
-					  	:user_id, :date, :description,
-						:run, :run_points,
-						:classic_roller_skiing, :classic_roller_skiing_points,
-						:skate_roller_skiing, :skate_roller_skiing_points,
-						:road_biking, :road_biking_points,
-						:mountain_biking, :mountain_biking_points,
-						:walking, :walking_points,
-						:hiking_with_packs, :hiking_with_packs_points,
-						:swimming, :swimming_points,
-						:paddling, :paddling_points,
-						:strength_training, :strength_training_points,
-						:aerobic_sports, :aerobic_sports_points
-					);`, activity)
-		if err != nil {
-			fmt.Println(err)
+		if err := services.AddActivity(db, activity); err != nil {
+			fmt.Printf("Error in CreateActivityPostHandler: %v\n", err)
 			return c.HTML(http.StatusOK, "Could not upload activity")
 		}
 
@@ -528,8 +503,8 @@ func CreateRoutes(e *echo.Echo, Db *sqlx.DB) {
 		return nil
 	})
 
-	for _, template := range t.templates.Templates() {
-		fmt.Printf("Template: %s\n", template.Name())
+	for _, templ := range t.templates.Templates() {
+		fmt.Printf("Template: %s\n", templ.Name())
 	}
 
 	e.Renderer = t
