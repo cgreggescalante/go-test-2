@@ -7,44 +7,40 @@ import (
 	"log"
 )
 
-type Store struct {
-	Db *sqlx.DB
-}
-
-func NewStore(name string) (Store, error) {
+func NewStore(name string) (*sqlx.DB, error) {
 	var (
 		Db  *sqlx.DB
 		err error
 	)
 
 	if Db != nil {
-		return Store{}, nil
+		return Db, nil
 	}
 
 	Db, err = sqlx.Open("sqlite3", name)
 	if err != nil {
-		return Store{}, fmt.Errorf("failed to connect to the database: %s", err)
+		return nil, fmt.Errorf("failed to connect to the database: %s", err)
 	}
 
 	if err = createUsersTable(Db); err != nil {
-		return Store{}, fmt.Errorf("failed to create users table: %s", err)
+		return nil, fmt.Errorf("failed to create users table: %s", err)
 	}
 
 	if err = createActivitiesTable(Db); err != nil {
-		return Store{}, fmt.Errorf("failed to create activities table: %s", err)
+		return nil, fmt.Errorf("failed to create activities table: %s", err)
 	}
 
 	if err = createEventTable(Db); err != nil {
-		return Store{}, fmt.Errorf("failed to create event table: %s", err)
+		return nil, fmt.Errorf("failed to create event table: %s", err)
 	}
 
 	if err = createEventRegistrationTable(Db); err != nil {
-		return Store{}, fmt.Errorf("failed to create event registration table: %s", err)
+		return nil, fmt.Errorf("failed to create event registration table: %s", err)
 	}
 
 	log.Println("Connected to the database")
 
-	return Store{Db}, nil
+	return Db, nil
 }
 
 func createUsersTable(db *sqlx.DB) error {

@@ -1,0 +1,22 @@
+{{ define "header" }}
+<header style="border: 1px solid black; display: flex; justify-content: space-between">
+  <span>
+    <a href="/" hx-get="/" hx-target="main" hx-swap="innerHTML" hx-push-url="/">Home</a>
+    <a href="/events" hx-get="/events" hx-target="main" hx-swap="innerHTML" hx-push-url="/events">Events</a>
+    <a href="/leaderboard" hx-get="/leaderboard" hx-target="main" hx-swap="innerHTML" hx-push-url="/leaderboard">Leaderboard</a>
+    {{ if .IsAuthorized }}
+      <a href="/addActivity" hx-get="/addActivity" hx-target="main" hx-swap="innerHTML" hx-push-url="/addActivity">Add Activity</a>
+    {{ end }}
+  </span>
+
+  <span>
+    {{ if .IsAuthorized }}
+      {{ .FirstName }} {{ .LastName }}
+      <a href="/" hx-post="/signout" hx-target="main" hx-swap="innerHTML" hx-push-url="/">Sign Out</a>
+    {{ else }}
+      <a href="/login" hx-get="/login" hx-target="main" hx-swap="innerHTML" hx-push-url="/login">Login</a>
+      <a href="/register" hx-get="/register" hx-target="main" hx-swap="innerHTML" hx-push-url="/register">Register</a>
+    {{ end }}
+  </span>
+</header>
+{{ end }}

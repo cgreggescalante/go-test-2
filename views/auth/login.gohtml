@@ -1,0 +1,21 @@
+{{ define "login" }}
+<h1>Login</h1>
+
+<form id="loginForm" hx-post="/login" hx-target="#loginMessage" hx-swap="innerHTML">
+    <label>
+        Email
+        <input type="email" name="email" required autofocus />
+    </label>
+    <label>
+        Password
+        <input type="password" name="password" required />
+    </label>
+
+    <button type="submit">
+        Login
+    </button>
+</form>
+
+<div id="loginMessage">
+</div>
+{{ end }}

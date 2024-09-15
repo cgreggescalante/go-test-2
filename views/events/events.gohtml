@@ -1,0 +1,21 @@
+{{ define "events" }}
+<div>Event List</div>
+<table>
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>Start</th>
+    <th>End</th>
+  </tr>
+  </thead>
+  <tbody>
+  {{ range . }}
+    <tr>
+        <td><a href="/event/{{ .Id }}" hx-get="/event/{{ .Id }}" hx-target="main" hx-swap="innerHTML" hx-push-url="/event/{{ .Id }}">{{ .Name }}</a></td>
+        <td>{{ .Start }}</td>
+        <td>{{ .End }}</td>
+    </tr>
+  {{ end }}
+  </tbody>
+</table>
+{{ end }}

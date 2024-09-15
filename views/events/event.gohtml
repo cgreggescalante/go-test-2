@@ -1,0 +1,19 @@
+{{ define "event" }}
+<h1>Event</h1>
+<div id="registrationStatus">
+    {{ if not .Authorized }}
+        You must be logged in to register for this event.
+    {{ else if .Registered }}
+        You are registered for this event.
+    {{ else if .RegistrationOpen }}
+        <button hx-post="/event/{{ .Event.Id }}/register" hx-swap="outerHTML">Click here to register</button>
+    {{ else }}
+        Registration is not open.
+    {{ end }}
+</div>
+<div>
+    <div>Name: {{ .Event.Name }}</div>
+    <div>Start: {{ .Event.Start }}</div>
+    <div>End: {{ .Event.End }}</div>
+</div>
+{{ end }}

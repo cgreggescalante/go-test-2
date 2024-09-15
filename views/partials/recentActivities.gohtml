@@ -1,0 +1,61 @@
+{{ define "recentActivities" }}
+    <script>
+        function handleFilterChange() {
+            const filter = document.getElementById("activityFilter").value;
+            const table = document.getElementById("recentActivitiesBody");
+
+            const row = document.createElement("tr");
+            row.setAttribute("hx-get", `/activities?page=1&pageSize=25&user=${filter}`);
+            row.setAttribute("hx-trigger", "load");
+            row.setAttribute("hx-swap", "outerHTML");
+
+            table.innerHTML = "";
+            table.appendChild(row);
+
+            htmx.process(row);
+        }
+    </script>
+
+    <h2>Recent Activities</h2>
+
+    {{ if . }}
+        <select id="activityFilter" onchange="handleFilterChange()">
+            <option value="all">All Activities</option>
+            <option value="current">My Activities</option>
+        </select>
+    {{ end }}
+
+    <table>
+        <thead>
+        <tr>
+            <th>User</th>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Run</th>
+            <th>Bike</th>
+            <th>Ski</th>
+            <th>Swim</th>
+        </tr>
+        </thead>
+        <tbody id="recentActivitiesBody">
+        <tr hx-get="/activities?page=1&pageSize=25&user=all" hx-trigger="load" hx-swap="outerHTML"></tr>
+        </tbody>
+    </table>
+{{ end }}
+
+{{ define "recentActivitiesBlock" }}
+{{ range .Activities }}
+    <tr>
+        <td>{{ .FirstName }} {{ .LastName }}</td>
+        <td>{{ .Date }}</td>
+        <td>{{ .Description }}</td>
+        <td>{{ .Run }}</td>
+        <td>{{ .RoadBiking }}</td>
+        <td>{{ .ClassicRollerSkiing }}</td>
+        <td>{{ .Swimming }}</td>
+    </tr>
+{{ end }}
+    {{ if .More }}
+        <tr hx-get="/activities?page={{ .Page }}&pageSize={{ .PageSize }}&user={{ .Filter }}" hx-trigger="revealed" hx-swap="outerHTML"></tr>
+    {{ end}}
+{{ end }}
