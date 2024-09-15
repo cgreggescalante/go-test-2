@@ -112,6 +112,8 @@ func createEventRegistrationTable(db *sqlx.DB) error {
 		    id INTEGER PRIMARY KEY AUTOINCREMENT,
 		    event_id INTEGER,
 		    user_id INTEGER,
+		    division VARCHAR(64),
+		    goal REAL,
 		    created INT,
 		    FOREIGN KEY (event_id) REFERENCES events(id),
 		    FOREIGN KEY (user_id) REFERENCES users(id)

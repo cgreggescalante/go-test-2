@@ -66,33 +66,3 @@ func CreateEventHandler(db *sqlx.DB) echo.HandlerFunc {
 		return c.Render(http.StatusOK, "event", data)
 	}
 }
-
-func CreateEventRegistrationHandler(db *sqlx.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		eventId, err := strconv.ParseInt(c.Param("id"), 10, 64)
-		if err != nil {
-			return err
-		}
-
-		userId, ok := c.Get(config.UserIdKey).(int64)
-		if !ok {
-			return c.HTML(http.StatusOK, "You must be logged in to register for this event.")
-		}
-
-		registrationOpen, err := services.CheckRegistrationOpen(db, eventId)
-		if err != nil {
-			fmt.Printf("Error in CreateEventRegistrationHandler: %v\n", err)
-			return c.HTML(http.StatusOK, "Could not register.")
-		}
-		if !registrationOpen {
-			return c.HTML(http.StatusOK, "Registration is not open for this event.")
-		}
-
-		if err := services.RegisterUserForEvent(db, eventId, userId); err != nil {
-			fmt.Printf("Error in CreateEventRegistrationHandler: %v\n", err)
-			return c.HTML(http.StatusOK, "Could not register.")
-		}
-
-		return c.HTML(http.StatusOK, "You are registered for this event.")
-	}
-}

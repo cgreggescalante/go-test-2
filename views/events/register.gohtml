@@ -1,0 +1,18 @@
+{{ define "eventRegistration" }}
+{{- /*gotype: nff-go-htmx/handlers.EventRegistrationData*/ -}}
+<h1>Register for {{ .Event.Name }}</h1>
+<form>
+    <select name="division">
+        <option value="">-- Select a Division --</option>
+        {{ range .Divisions }}
+            <option value="{{ . }}">{{ . }}</option>
+        {{ end }}
+    </select>
+    <label>
+        Goal
+        <input type="number" name="goal">
+    </label>
+    <button hx-post="/event/{{ .Event.Id }}/register" hx-swap="innerHTML" hx-target="#registerMessage">Register</button>
+    <div id="registerMessage"></div>
+</form>
+{{ end }}

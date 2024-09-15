@@ -82,6 +82,7 @@ func CreateRoutes(e *echo.Echo, Db *sqlx.DB) {
 
 	e.GET("/events", CreateEventListHandler(Db))
 	e.GET("/event/:id", CreateEventHandler(Db))
+	e.GET("/event/:id/register", EventRegistration(Db))
 	e.POST("/event/:id/register", CreateEventRegistrationHandler(Db))
 
 	e.GET("/login", Login)

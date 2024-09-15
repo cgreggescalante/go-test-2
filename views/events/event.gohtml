@@ -6,7 +6,7 @@
     {{ else if .Registered }}
         You are registered for this event.
     {{ else if .RegistrationOpen }}
-        <button hx-post="/event/{{ .Event.Id }}/register" hx-swap="outerHTML">Click here to register</button>
+        <button hx-get="/event/{{ .Event.Id }}/register" hx-target="main" hx-swap="innerHTML" hx-push-url="/event/{{ .Event.Id }}/register">Click here to register</button>
     {{ else }}
         Registration is not open.
     {{ end }}

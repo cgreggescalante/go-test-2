@@ -2,10 +2,11 @@ package services
 
 import (
 	"github.com/jmoiron/sqlx"
+	"nff-go-htmx/models"
 )
 
-func RegisterUserForEvent(Db *sqlx.DB, eventId int64, userId int64) error {
-	if _, err := Db.Exec(`INSERT INTO eventRegistrations (event_id, user_id) VALUES (?, ?);`, eventId, userId); err != nil {
+func RegisterUserForEvent(Db *sqlx.DB, registration models.EventRegistration) error {
+	if _, err := Db.NamedExec(`INSERT INTO eventRegistrations (event_id, user_id, division, goal, created) VALUES (:event_id, :user_id, :division, :goal, :created);`, registration); err != nil {
 		return err
 	}
 
