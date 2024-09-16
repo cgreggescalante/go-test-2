@@ -8,7 +8,19 @@
     <script src="https://unpkg.com/htmx.org@2.0.2" integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ" crossorigin="anonymous"></script>
     <title>NFF</title>
 </head>
-<body>
+<style>
+    body {
+        display: flex;
+        margin: 0;
+    }
+
+    main {
+        width: 100%;
+        margin: 50px 0 0 160px;
+    }
+</style>
+<body style="display: flex; margin: 0">
+    {{ template "sidenav" . }}
     {{ template "header" .UserData }}
     <main>
         <a hx-get="{{ .Path }}" hx-trigger="load" hx-swap="outerHTML"></a>
