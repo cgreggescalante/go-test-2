@@ -55,6 +55,8 @@ func CreateRoutes(e *echo.Echo, Db *sqlx.DB) {
 		templates: template.New(""),
 	}
 
+	t.templates.Option()
+
 	filepath.Walk("views", func(path string, info os.FileInfo, err error) error {
 		if strings.HasSuffix(path, ".gohtml") {
 			_, err := t.templates.ParseFiles(path)

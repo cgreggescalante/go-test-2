@@ -85,6 +85,7 @@ func createActivitiesTable(db *sqlx.DB) error {
 			strength_training_points REAL,
 			aerobic_sports REAL,
 			aerobic_sports_points REAL,
+			points REAL,
 		    FOREIGN KEY (user_id) REFERENCES users(id)
 		)
 	`)

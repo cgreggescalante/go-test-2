@@ -51,16 +51,27 @@ func CreateEventHandler(db *sqlx.DB) echo.HandlerFunc {
 			registered = false
 		}
 
+		leaderboard, err := services.GetEventLeaderboard(db, eventId)
+		if err != nil {
+			leaderboard = []models.LeaderboardEntry{}
+		}
+
+		for i := 0; i < len(leaderboard); i++ {
+			leaderboard[i].Points = float64(int64(leaderboard[i].Points*100)) / 100
+		}
+
 		data := struct {
 			Event            models.Event
 			Authorized       bool
 			Registered       bool
 			RegistrationOpen bool
+			Leaderboard      []models.LeaderboardEntry
 		}{
 			Event:            event,
 			Authorized:       authorized,
 			Registered:       registered,
 			RegistrationOpen: event.RegistrationStart < time.Now().Unix() && event.RegistrationEnd > time.Now().Unix(),
+			Leaderboard:      leaderboard,
 		}
 
 		return c.Render(http.StatusOK, "event", data)

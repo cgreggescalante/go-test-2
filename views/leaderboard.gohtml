@@ -1,22 +1,5 @@
 {{ define "leaderboard" }}
 <h1>Leaderboard</h1>
 <title>NFF - Leaderboard</title>
-<table>
-    <thead>
-    <tr>
-        <th>Rank</th>
-        <th>User</th>
-        <th>Points</th>
-    </tr>
-    </thead>
-    <tbody>
-    {{ range . }}
-        <tr>
-            <td>{{ .Rank }}</td>
-            <td>{{ .FirstName }} {{ .LastName }}</td>
-            <td>{{ .Points }}</td>
-        </tr>
-    {{ end }}
-    </tbody>
-</table>
+{{ template "leaderboardTable" . }}
 {{ end }}

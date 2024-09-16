@@ -29,6 +29,7 @@ type Activity struct {
 	StrengthTrainingPoints    float64 `db:"strength_training_points"`
 	AerobicSports             float64 `db:"aerobic_sports"`
 	AerobicSportsPoints       float64 `db:"aerobic_sports_points"`
+	Points                    float64
 }
 
 type LeaderboardEntry struct {

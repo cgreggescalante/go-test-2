@@ -10,11 +10,15 @@ import (
 
 func CreateLeaderboardHandler(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		entries, err := services.GetLeaderboard(db)
+		leaderboard, err := services.GetLeaderboard(db)
 		if err != nil {
 			fmt.Printf("Error in CreateLeaderboardHandler: %v\n", err)
 		}
 
-		return c.Render(http.StatusOK, "leaderboard", entries)
+		for i := 0; i < len(leaderboard); i++ {
+			leaderboard[i].Points = float64(int64(leaderboard[i].Points*100)) / 100
+		}
+
+		return c.Render(http.StatusOK, "leaderboard", leaderboard)
 	}
 }
