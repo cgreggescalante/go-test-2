@@ -52,6 +52,7 @@ func main() {
 
 	e.Use(middleware.Logger())
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(config.SecretKey))))
+	e.Use(middleware.Gzip())
 
 	Db, err := db.NewStore(config.DbName)
 	if err != nil {
