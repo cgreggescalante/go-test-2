@@ -1,5 +1,6 @@
 {{ define "event" }}
 <h1>Event</h1>
+    <title>NFF | {{ .Event.Name }}</title>
 <div id="registrationStatus">
     {{ if not .Authorized }}
         You must be logged in to register for this event.
