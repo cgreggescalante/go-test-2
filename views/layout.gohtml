@@ -9,19 +9,143 @@
     <title>NFF</title>
 </head>
 <style>
+    :root {
+        --sidenav-width: 225px;
+        --sidenav-collapsed-width: 45px;
+    }
+
     body {
         display: flex;
         margin: 0;
     }
 
+    .sidenav {
+        height: 100%;
+        width: var(--sidenav-width);
+        position: fixed;
+        z-index: 2;
+        top: 0;
+        left: 0;
+        background-color: #555;
+        overflow-x: hidden;
+        padding-top: 20px;
+
+        transition: width 0.3s;
+    }
+
+    .sidenav a {
+        text-decoration: none;
+        font-size: 25px;
+        color: #f1f1f1;
+        display: block;
+
+        transition: font-size 0.3s;
+    }
+
+    .header {
+        height: 30px;
+        width: calc(100% - var(--sidenav-collapsed-width) - 20px);
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        position: fixed;
+        z-index: 1;
+        top: 0;
+        left: var(--sidenav-collapsed-width);
+        background-color: #999;
+
+        transition: width 0.3s, left 0.3s, background-color 0.3s;
+    }
+
+    .header a {
+        text-decoration: none;
+        font-size: 20px;
+        color: #333;
+        padding: 5px;
+    }
+
     main {
         width: 100%;
-        margin: 50px 0 0 160px;
+        margin: 50px 0 0 var(--sidenav-width);
+
+        transition: margin 0.3s, width 0.3s, background-color 0.3s;
+    }
+
+    main.shadow {
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+
+    .header.shadow {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    .expandSidenav { visibility: hidden }
+    .closeSidenav { visibility: hidden }
+
+    @media screen and (max-width: 800px) {
+        .expandSidenav {visibility: visible}
+        .sidenav.expanded .closeSidenav {visibility: visible}
+        .sidenav {width: var(--sidenav-collapsed-width)}
+        .sidenav.expanded {width: var(--sidenav-width)}
+        .sidenav a {font-size: 18px}
+        .sidenav.expanded a {font-size: 25px}
+        main {margin: 50px 0 0 var(--sidenav-collapsed-width); width: calc(100% - var(--sidenav-collapsed-width))}
+    }
+
+    @media screen and (max-width: 500px) {
+        .sidenav {width: 0}
+        .sidenav a {font-size: 0}
+        .header {width: calc(100% - 20px); left: 0}
+        main {margin: 50px 0 0 0; width: 100%}
     }
 </style>
+<script>
+    function expandSidenav() {
+        document.querySelector('.sidenav').classList.add('expanded');
+        document.querySelector('main').classList.add('shadow');
+        document.querySelector('.header').classList.add('shadow');
+    }
+    function closeSidenav() {
+        document.querySelector('.sidenav').classList.remove('expanded');
+        document.querySelector('main').classList.remove('shadow');
+        document.querySelector('.header').classList.remove('shadow');
+    }
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 800) {
+            document.querySelector('.sidenav').classList.remove('expanded');
+            document.querySelector('main').classList.remove('shadow');
+            document.querySelector('.header').classList.remove('shadow');
+        }
+    });
+</script>
 <body style="display: flex; margin: 0">
-    {{ template "sidenav" . }}
-    {{ template "header" .UserData }}
+    <div class="sidenav">
+        <button class="closeSidenav" onclick="closeSidenav()">X</button>
+        <a href="/" hx-get="/" hx-target="main" hx-swap="innerHTML" hx-push-url="/">Home</a>
+        <a href="/events" hx-get="/events" hx-target="main" hx-swap="innerHTML" hx-push-url="/events">Events</a>
+        <a href="/leaderboard" hx-get="/leaderboard" hx-target="main" hx-swap="innerHTML" hx-push-url="/leaderboard">Leaderboard</a>
+        {{ if .IsAuthorized }}
+            <a href="/addActivity" hx-get="/addActivity" hx-target="main" hx-swap="innerHTML" hx-push-url="/addActivity">Add Activity</a>
+        {{ end }}
+    </div>
+
+    <div class="header">
+        <svg width="26px" height="26px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" onclick="expandSidenav()">
+            <path d="M3 12H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 6H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>
+            {{ if .IsAuthorized }}
+                <a href="/" hx-post="/signout" hx-target="main" hx-swap="innerHTML" hx-push-url="/">Sign Out</a>
+            {{ else }}
+                <a href="/login" hx-get="/login" hx-target="main" hx-swap="innerHTML" hx-push-url="/login">Login</a>
+                <a href="/register" hx-get="/register" hx-target="main" hx-swap="innerHTML" hx-push-url="/register">Register</a>
+            {{ end }}
+        </span>
+    </div>
+
     <main>
         <a hx-get="{{ .Path }}" hx-trigger="load" hx-swap="outerHTML"></a>
     </main>
