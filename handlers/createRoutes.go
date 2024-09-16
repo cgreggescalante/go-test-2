@@ -4,7 +4,9 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"github.com/tdewolff/minify/v2"
+	"github.com/tdewolff/minify/v2/css"
 	"github.com/tdewolff/minify/v2/html"
+	"github.com/tdewolff/minify/v2/js"
 	"html/template"
 	"io"
 	"nff-go-htmx/config"
@@ -64,6 +66,8 @@ func compileTemplates() (*template.Template, error) {
 
 	m := minify.New()
 	m.AddFunc("text/html", html.Minify)
+	m.AddFunc("text/css", css.Minify)
+	m.AddFunc("application/javascript", js.Minify)
 
 	var tmpl *template.Template
 	for _, path := range paths {

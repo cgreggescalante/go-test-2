@@ -1,19 +1,6 @@
 {{ define "recentActivities" }}
     <script>
-        function handleFilterChange() {
-            const filter = document.getElementById("activityFilter").value;
-            const table = document.getElementById("recentActivitiesBody");
-
-            const row = document.createElement("tr");
-            row.setAttribute("hx-get", `/activities?page=1&pageSize=25&user=${filter}`);
-            row.setAttribute("hx-trigger", "load");
-            row.setAttribute("hx-swap", "outerHTML");
-
-            table.innerHTML = "";
-            table.appendChild(row);
-
-            htmx.process(row);
-        }
+        const handlerFilterChange = () => document.getElementById("recentActivitiesBody").innerHTML = `<tr hx-get="/activities?page=1&pageSize=25&user=${document.getElementById("activityFilter").value}" hx-trigger="load" hx-swap="outerHTML" />`;
     </script>
 
     <h2>Recent Activities</h2>
