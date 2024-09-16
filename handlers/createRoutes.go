@@ -1,9 +1,10 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
+	"github.com/tdewolff/minify/v2"
+	"github.com/tdewolff/minify/v2/html"
 	"html/template"
 	"io"
 	"nff-go-htmx/config"
@@ -50,26 +51,46 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	})
 }
 
-func CreateRoutes(e *echo.Echo, Db *sqlx.DB) {
-	t := &Template{
-		templates: template.New(""),
-	}
-
-	t.templates.Option()
+// MINIFY HTML TEMPLATES FOR MASSIVE SAVINGS
+func compileTemplates() (*template.Template, error) {
+	paths := make([]string, 0)
 
 	filepath.Walk("views", func(path string, info os.FileInfo, err error) error {
 		if strings.HasSuffix(path, ".gohtml") {
-			_, err := t.templates.ParseFiles(path)
-			if err != nil {
-				fmt.Printf("Failed to parse file: %s", err)
-			}
+			paths = append(paths, path)
 		}
-
 		return nil
 	})
 
-	for _, templ := range t.templates.Templates() {
-		fmt.Printf("Template: %s\n", templ.Name())
+	m := minify.New()
+	m.AddFunc("text/html", html.Minify)
+
+	var tmpl *template.Template
+	for _, path := range paths {
+		name := filepath.Base(path)
+		if tmpl == nil {
+			tmpl = template.New(name)
+		} else {
+			tmpl = tmpl.New(name)
+		}
+
+		b, err := os.ReadFile(path)
+		if err != nil {
+			return nil, err
+		}
+
+		mb, err := m.Bytes("text/html", b)
+		if err != nil {
+			return nil, err
+		}
+		tmpl.Parse(string(mb))
+	}
+	return tmpl, nil
+}
+
+func CreateRoutes(e *echo.Echo, Db *sqlx.DB) {
+	t := &Template{
+		templates: template.Must(compileTemplates()),
 	}
 
 	e.Renderer = t
