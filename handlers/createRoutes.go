@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"bytes"
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"github.com/tdewolff/minify/v2"
@@ -65,9 +67,9 @@ func compileTemplates() (*template.Template, error) {
 	})
 
 	m := minify.New()
-	m.AddFunc("text/html", html.Minify)
 	m.AddFunc("text/css", css.Minify)
 	m.AddFunc("application/javascript", js.Minify)
+	htmlMinifier := &html.Minifier{TemplateDelims: html.GoTemplateDelims}
 
 	var tmpl *template.Template
 	for _, path := range paths {
@@ -83,11 +85,18 @@ func compileTemplates() (*template.Template, error) {
 			return nil, err
 		}
 
-		mb, err := m.Bytes("text/html", b)
+		r := bytes.NewBufferString(string(b))
+		w := &bytes.Buffer{}
+		err = htmlMinifier.Minify(m, w, r, nil)
 		if err != nil {
 			return nil, err
 		}
-		tmpl.Parse(string(mb))
+
+		fmt.Println(path)
+		if path == "views\\addActivity.gohtml" {
+			fmt.Println(w.String())
+		}
+		tmpl.Parse(w.String())
 	}
 	return tmpl, nil
 }

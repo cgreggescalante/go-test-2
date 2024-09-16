@@ -1,6 +1,9 @@
 {{ define "recentActivities" }}
     <script>
-        const handlerFilterChange = () => document.getElementById("recentActivitiesBody").innerHTML = `<tr hx-get="/activities?page=1&pageSize=25&user=${document.getElementById("activityFilter").value}" hx-trigger="load" hx-swap="outerHTML" />`;
+        function handleFilterChange() {
+            document.getElementById("recentActivitiesBody").innerHTML = `<tr hx-get="/activities?page=1&pageSize=25&user=${document.getElementById("activityFilter").value}" hx-trigger="load" hx-swap="outerHTML" />`;
+            htmx.process(document.getElementById("recentActivitiesBody"));
+        }
     </script>
 
     <h2>Recent Activities</h2>
@@ -32,8 +35,7 @@
 
 {{ define "recentActivitiesBlock" }}
     {{- /*gotype: nff-go-htmx/handlers.RecentActivitiesBlockData*/ -}}
-    {{ range .Activities }}
-    <tr>
+    {{ range .Activities }}<tr>
         <td>{{ .FirstName }} {{ .LastName }}</td>
         <td>{{ .Date }}</td>
         <td>{{ .Description }}</td>
@@ -41,8 +43,7 @@
         <td>{{ .RoadBiking }}</td>
         <td>{{ .ClassicRollerSkiing }}</td>
         <td>{{ .Swimming }}</td>
-    </tr>
-{{ end }}
+    </tr>{{ end }}
     {{ if .More }}
         <tr hx-get="/activities?page={{ .Page }}&pageSize={{ .PageSize }}&user={{ .Filter }}" hx-trigger="revealed" hx-swap="outerHTML"></tr>
     {{ end}}

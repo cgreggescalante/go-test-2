@@ -2,7 +2,6 @@
 <script>
     function handleSelect() {
         const selector = document.getElementById("activitySelector");
-        const list = document.getElementById("selectedActivities");
 
         if (selector.selectedIndex === 0) return;
 
@@ -16,40 +15,30 @@
         btn.addEventListener("click", () => {
             newItem.remove();
 
-            const option = document.createElement("option");
-            option.value = value;
-            option.textContent = value;
-            selector.appendChild(option);
+            selector.insertAdjacentHTML("beforeend", `<option value="${value}">${value}</option>`);
         });
 
-        const span = document.createElement("span");
-        span.innerText = value;
-
-        const input = document.createElement("input");
-        input.type = "number";
-        input.id = value;
-        input.name = value;
-
         newItem.appendChild(btn);
-        newItem.appendChild(span);
-        newItem.appendChild(input);
+        newItem.insertAdjacentHTML("beforeend", `<span>${value}</span>`);
+        newItem.insertAdjacentHTML("beforeend", `<input type="number" id="${value}" name="${value}">`);
 
-        newItem.id = `${value}-row`
-        newItem.style = "display: flex; flex-direction: row"
-        list.appendChild(newItem);
+        newItem.id = `${value}-row`;
+        newItem.style = "display: flex; flex-direction: row";
+
+        document.getElementById("selectedActivities").appendChild(newItem);
     }
 </script>
 
 <h1>Add Activity</h1>
 
 <select id="activitySelector" onchange="handleSelect()">
-    <option value="">-- Select an Activity --</option>
-    {{ range .ActivityTypes }}
-        <option value="{{ . }}">{{ . }}</option>
+    <option value="">-- Select an Activity --
+    {{ range . }}
+        <option value="{{ . }}">{{ . }}
     {{ end }}
 </select>
 
-<form id="addActivityForm"  hx-post="/addActivity" hx-target="#addActivityMessage" hx-swap="innerHTML">
+<form hx-post="/addActivity" hx-target="#addActivityMessage" hx-swap="innerHTML">
     <div>
         <label>
             Description

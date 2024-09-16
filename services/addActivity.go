@@ -18,7 +18,8 @@ func AddActivity(db *sqlx.DB, activity models.Activity) error {
 		               swimming, swimming_points,
 		               paddling, paddling_points,
 		               strength_training, strength_training_points,
-		               aerobic_sports, aerobic_sports_points
+		               aerobic_sports, aerobic_sports_points,
+		               points
 					) VALUES (
 					  	:user_id, :date, :description,
 						:run, :run_points,
@@ -31,7 +32,8 @@ func AddActivity(db *sqlx.DB, activity models.Activity) error {
 						:swimming, :swimming_points,
 						:paddling, :paddling_points,
 						:strength_training, :strength_training_points,
-						:aerobic_sports, :aerobic_sports_points
+						:aerobic_sports, :aerobic_sports_points,
+						:points
 					);`, activity)
 
 	return err

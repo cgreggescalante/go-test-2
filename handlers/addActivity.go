@@ -12,12 +12,8 @@ import (
 	"time"
 )
 
-type AddActivityData struct {
-	ActivityTypes []string
-}
-
 func AddActivity(c echo.Context) error {
-	return c.Render(http.StatusOK, "addActivity", AddActivityData{ActivityTypes: models.ActivityTypes})
+	return c.Render(http.StatusOK, "addActivity", models.ActivityTypes)
 }
 
 func CreateActivityPostHandler(db *sqlx.DB) echo.HandlerFunc {

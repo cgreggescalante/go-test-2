@@ -1,20 +1,18 @@
 {{ define "leaderboardTable" }}
-<table>
-    <thead>
-    <tr>
-        <th>Rank</th>
-        <th>User</th>
-        <th>Points</th>
-    </tr>
-    </thead>
-    <tbody>
-    {{ range . }}
+    <table>
+        <thead>
         <tr>
+            <th>Rank</th>
+            <th>User</th>
+            <th>Points</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{ range . }}<tr>
             <td>{{ .Rank }}</td>
             <td>{{ .FirstName }} {{ .LastName }}</td>
             <td>{{ .Points }}</td>
-        </tr>
-    {{ end }}
-    </tbody>
-</table>
+        </tr>{{ end }}
+        </tbody>
+    </table>
 {{ end }}
