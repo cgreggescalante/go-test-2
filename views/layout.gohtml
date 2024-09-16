@@ -54,7 +54,7 @@
         left: var(--sidenav-collapsed-width);
         background-color: #999;
 
-        transition: width 0.3s, left 0.3s, background-color 0.3s;
+        transition: width 0.3s, left 0.3s;
     }
 
     .header a {
@@ -68,15 +68,25 @@
         width: 100%;
         margin: 50px 0 0 var(--sidenav-width);
 
-        transition: margin 0.3s, width 0.3s, background-color 0.3s;
+        transition: margin 0.3s, width 0.3s;
     }
 
-    main.shadow {
-        background-color: rgba(0, 0, 0, 0.7);
+    .hider {
+        position: fixed;
+        z-index: -1;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0);
+
+        transition: background-color 0.3s, z-index 0.3s;
     }
 
-    .header.shadow {
-        background-color: rgba(0, 0, 0, 0.8);
+    .hider.expanded {
+        z-index: 1;
+        background-color: rgba(0, 0, 0, 0.5);
+        transition: background-color 0.3s, z-index 0s;
     }
 
     .expandSidenav { visibility: hidden }
@@ -102,31 +112,28 @@
 <script>
     function expandSidenav() {
         document.querySelector('.sidenav').classList.add('expanded');
-        document.querySelector('main').classList.add('shadow');
-        document.querySelector('.header').classList.add('shadow');
+        document.querySelector('.hider').classList.add('expanded');
     }
     function closeSidenav() {
         document.querySelector('.sidenav').classList.remove('expanded');
-        document.querySelector('main').classList.remove('shadow');
-        document.querySelector('.header').classList.remove('shadow');
+        document.querySelector('.hider').classList.remove('expanded');
     }
 
     window.addEventListener('resize', () => {
         if (window.innerWidth > 800) {
             document.querySelector('.sidenav').classList.remove('expanded');
-            document.querySelector('main').classList.remove('shadow');
-            document.querySelector('.header').classList.remove('shadow');
+            document.querySelector('.hider').classList.remove('expanded');
         }
     });
 </script>
 <body style="display: flex; margin: 0">
     <div class="sidenav">
         <button class="closeSidenav" onclick="closeSidenav()">X</button>
-        <a href="/" hx-get="/" hx-target="main" hx-swap="innerHTML" hx-push-url="/">Home</a>
-        <a href="/events" hx-get="/events" hx-target="main" hx-swap="innerHTML" hx-push-url="/events">Events</a>
-        <a href="/leaderboard" hx-get="/leaderboard" hx-target="main" hx-swap="innerHTML" hx-push-url="/leaderboard">Leaderboard</a>
+        <a href="/" hx-get="/" hx-target="main" hx-swap="innerHTML" hx-push-url="/" onclick="closeSidenav()">Home</a>
+        <a href="/events" hx-get="/events" hx-target="main" hx-swap="innerHTML" hx-push-url="/events" onclick="closeSidenav()">Events</a>
+        <a href="/leaderboard" hx-get="/leaderboard" hx-target="main" hx-swap="innerHTML" hx-push-url="/leaderboard" onclick="closeSidenav()">Leaderboard</a>
         {{ if .IsAuthorized }}
-            <a href="/addActivity" hx-get="/addActivity" hx-target="main" hx-swap="innerHTML" hx-push-url="/addActivity">Add Activity</a>
+            <a href="/addActivity" hx-get="/addActivity" hx-target="main" hx-swap="innerHTML" hx-push-url="/addActivity" onclick="closeSidenav()">Add Activity</a>
         {{ end }}
     </div>
 
@@ -145,6 +152,8 @@
             {{ end }}
         </span>
     </div>
+
+    <div class="hider" onclick="closeSidenav()"></div>
 
     <main>
         <a hx-get="{{ .Path }}" hx-trigger="load" hx-swap="outerHTML"></a>
