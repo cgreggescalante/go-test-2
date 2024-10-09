@@ -12,11 +12,11 @@ import (
 	"time"
 )
 
-func AddActivity(c echo.Context) error {
-	return c.Render(http.StatusOK, "addActivity", models.ActivityTypes)
+func AddUpload(c echo.Context) error {
+	return c.Render(http.StatusOK, "addUpload", models.ActivityTypes)
 }
 
-func CreateActivityPostHandler(db *sqlx.DB) echo.HandlerFunc {
+func CreateUploadPostHandler(db *sqlx.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId, ok := c.Get(config.UserIdKey).(int64)
 		if !ok {
@@ -29,7 +29,7 @@ func CreateActivityPostHandler(db *sqlx.DB) echo.HandlerFunc {
 		for _, item := range models.ActivityTypes {
 			duration, err := strconv.ParseFloat("0"+c.FormValue(item), 32)
 			if err != nil {
-				fmt.Printf("Error in CreateActivityPostHandler: %v\n", err)
+				fmt.Printf("Error in CreateUploadPostHandler: %v\n", err)
 				return c.HTML(http.StatusOK, fmt.Sprintf("Bad input for %s duration", item))
 			}
 			durations[item] = duration
@@ -71,7 +71,7 @@ func CreateActivityPostHandler(db *sqlx.DB) echo.HandlerFunc {
 		}
 
 		if err := services.AddActivity(db, activity); err != nil {
-			fmt.Printf("Error in CreateActivityPostHandler: %v\n", err)
+			fmt.Printf("Error in CreateUploadPostHandler: %v\n", err)
 			return c.HTML(http.StatusOK, "Could not upload activity")
 		}
 

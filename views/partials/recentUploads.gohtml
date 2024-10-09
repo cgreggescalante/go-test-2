@@ -1,21 +1,21 @@
 {{ define "recentUploads" }}
     <script>
         function handleFilterChange() {
-            document.getElementById("recentActivitiesBody").innerHTML = `<a hx-get="/uploads?page=1&pageSize=25&user=${document.getElementById("activityFilter").value}" hx-trigger="load" hx-swap="outerHTML" />`;
-            htmx.process(document.getElementById("recentActivitiesBody"));
+            document.getElementById("recentUploadsBody").innerHTML = `<a hx-get="/uploads?page=1&pageSize=25&user=${document.getElementById("uploadFilter").value}" hx-trigger="load" hx-swap="outerHTML" />`;
+            htmx.process(document.getElementById("recentUploadsBody"));
         }
     </script>
 
     <h2>Recent Activities</h2>
 
     {{ if . }}
-        <select id="activityFilter" onchange="handleFilterChange()">
+        <select id="uploadFilter" onchange="handleFilterChange()">
             <option value="all">All Activities</option>
             <option value="current">My Activities</option>
         </select>
     {{ end }}
 
-    <div id="recentActivitiesBody">
+    <div id="recentUploadsBody">
         <a hx-get="/uploads?page=1&pageSize=25&user=all" hx-trigger="load" hx-swap="outerHTML"></a>
     </div>
 {{ end }}

@@ -1,4 +1,4 @@
-{{ define "addActivity" }}
+{{ define "addUpload" }}
 <script>
     function handleSelect() {
         const selector = document.getElementById("activitySelector");
@@ -38,7 +38,7 @@
     {{ end }}
 </select>
 
-<form hx-post="/addActivity" hx-target="#addActivityMessage" hx-swap="innerHTML">
+<form hx-post="/addUpload" hx-target="#addActivityMessage" hx-swap="innerHTML">
     <div>
         <label>
             Description

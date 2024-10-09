@@ -106,8 +106,8 @@ func CreateRoutes(e *echo.Echo, Db *sqlx.DB) {
 	e.GET("/", Home)
 	e.GET("/home", Home)
 	e.GET("/uploads", CreateUploadListHandler(Db))
-	e.GET("/addActivity", AddActivity)
-	e.POST("/addActivity", CreateActivityPostHandler(Db))
+	e.GET("/addUpload", AddUpload)
+	e.POST("/addUpload", CreateUploadPostHandler(Db))
 
 	e.GET("/leaderboard", CreateLeaderboardHandler(Db))
 
