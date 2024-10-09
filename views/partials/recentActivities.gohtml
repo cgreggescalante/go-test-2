@@ -1,7 +1,7 @@
-{{ define "recentActivities" }}
+{{ define "recentUploads" }}
     <script>
         function handleFilterChange() {
-            document.getElementById("recentActivitiesBody").innerHTML = `<tr hx-get="/activities?page=1&pageSize=25&user=${document.getElementById("activityFilter").value}" hx-trigger="load" hx-swap="outerHTML" />`;
+            document.getElementById("recentActivitiesBody").innerHTML = `<a hx-get="/uploads?page=1&pageSize=25&user=${document.getElementById("activityFilter").value}" hx-trigger="load" hx-swap="outerHTML" />`;
             htmx.process(document.getElementById("recentActivitiesBody"));
         }
     </script>
@@ -15,36 +15,22 @@
         </select>
     {{ end }}
 
-    <table>
-        <thead>
-        <tr>
-            <th>User</th>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Run</th>
-            <th>Bike</th>
-            <th>Ski</th>
-            <th>Swim</th>
-        </tr>
-        </thead>
-        <tbody id="recentActivitiesBody">
-        <tr hx-get="/activities?page=1&pageSize=25&user=all" hx-trigger="load" hx-swap="outerHTML"></tr>
-        </tbody>
-    </table>
+    <div id="recentActivitiesBody">
+        <a hx-get="/uploads?page=1&pageSize=25&user=all" hx-trigger="load" hx-swap="outerHTML"></a>
+    </div>
 {{ end }}
 
-{{ define "recentActivitiesBlock" }}
-    {{- /*gotype: nff-go-htmx/handlers.RecentActivitiesBlockData*/ -}}
-    {{ range .Activities }}<tr>
-        <td>{{ .FirstName }} {{ .LastName }}</td>
-        <td>{{ .Date }}</td>
-        <td>{{ .Description }}</td>
-        <td>{{ .Run }}</td>
-        <td>{{ .RoadBiking }}</td>
-        <td>{{ .ClassicRollerSkiing }}</td>
-        <td>{{ .Swimming }}</td>
-    </tr>{{ end }}
+{{ define "recentUploadsBlock" }}
+    {{- /*gotype: nff-go-htmx/handlers.RecentUploadsBlockData*/ -}}
+    {{ range .Uploads }}<div>
+        <h4>{{ .FirstName }} {{ .LastName }}</h4>
+        <p>{{ .DateFormatted }}</p>
+        <p>{{ .Description }}</p>
+        {{ range .Activities }}
+            <p>{{ .Name }}</p>
+        {{ end }}
+    </div>{{ end }}
     {{ if .More }}
-        <tr hx-get="/activities?page={{ .Page }}&pageSize={{ .PageSize }}&user={{ .Filter }}" hx-trigger="revealed" hx-swap="outerHTML"></tr>
+        <a hx-get="/uploads?page={{ .Page }}&pageSize={{ .PageSize }}&user={{ .Filter }}" hx-trigger="revealed" hx-swap="outerHTML"></a>
     {{ end}}
 {{ end }}

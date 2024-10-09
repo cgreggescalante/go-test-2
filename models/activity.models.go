@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 var ActivityTypes = []string{"Run", "Classic Roller Skiing", "Skate Roller Skiing", "Road Biking", "Mountain Biking", "Walking", "Hiking With Packs", "Swimming", "Paddling", "Strength Training", "Aerobic Sports"}
 
 type Activity struct {
@@ -32,14 +34,74 @@ type Activity struct {
 	Points                    float64
 }
 
+func (a *Activity) GetDuration(activityName string) float64 {
+	switch activityName {
+	case "Run":
+		return a.Run
+	case "Classic Roller Skiing":
+		return a.ClassicRollerSkiing
+	case "Skate Roller Skiing":
+		return a.SkateRollerSkiing
+	case "Road Biking":
+		return a.RoadBiking
+	case "Mountain Biking":
+		return a.MountainBiking
+	case "Walking":
+		return a.Walking
+	case "Hiking With Packs":
+		return a.HikingWithPacks
+	case "Swimming":
+		return a.Swimming
+	case "Paddling":
+		return a.Paddling
+	case "Strength Training":
+		return a.StrengthTraining
+	case "Aerobic Sports":
+		return a.AerobicSports
+	}
+
+	return 0
+}
+
+func (a *Activity) GetPoints(activityName string) float64 {
+	switch activityName {
+	case "Run":
+		return a.RunPoints
+	case "Classic Roller Skiing":
+		return a.ClassicRollerSkiingPoints
+	case "Skate Roller Skiing":
+		return a.SkateRollerSkiingPoints
+	case "Road Biking":
+		return a.RoadBikingPoints
+	case "Mountain Biking":
+		return a.MountainBikingPoints
+	case "Walking":
+		return a.WalkingPoints
+	case "Hiking With Packs":
+		return a.HikingWithPacksPoints
+	case "Swimming":
+		return a.SwimmingPoints
+	case "Paddling":
+		return a.PaddlingPoints
+	case "Strength Training":
+		return a.StrengthTrainingPoints
+	case "Aerobic Sports":
+		return a.AerobicSportsPoints
+	}
+
+	return 0
+}
+
 type LeaderboardEntry struct {
 	User
 	Points float64
 	Rank   int
 }
 
-type ActivityWithUser struct {
+type UploadWithUser struct {
 	Activity
-	FirstName string `db:"first_name"`
-	LastName  string `db:"last_name"`
+	DateObj       time.Time
+	DateFormatted string
+	FirstName     string `db:"first_name"`
+	LastName      string `db:"last_name"`
 }

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"github.com/tdewolff/minify/v2"
@@ -92,10 +91,6 @@ func compileTemplates() (*template.Template, error) {
 			return nil, err
 		}
 
-		fmt.Println(path)
-		if path == "views\\addActivity.gohtml" {
-			fmt.Println(w.String())
-		}
 		tmpl.Parse(w.String())
 	}
 	return tmpl, nil
@@ -110,7 +105,7 @@ func CreateRoutes(e *echo.Echo, Db *sqlx.DB) {
 
 	e.GET("/", Home)
 	e.GET("/home", Home)
-	e.GET("/activities", CreateActivityListHandler(Db))
+	e.GET("/uploads", CreateUploadListHandler(Db))
 	e.GET("/addActivity", AddActivity)
 	e.POST("/addActivity", CreateActivityPostHandler(Db))
 
